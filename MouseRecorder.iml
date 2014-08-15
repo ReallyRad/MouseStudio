@@ -12,7 +12,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="core" level="project" />
-    <orderEntry type="library" exported="" name="MouseHook" level="project" />
     <orderEntry type="library" name="JNativeHook" level="project" />
     <orderEntry type="library" name="toxiclibscore" level="project" />
     <orderEntry type="library" name="toxiclibs_p5" level="project" />
