@@ -1,12 +1,12 @@
 package both;
 
-import java.awt.Point;
+import toxi.geom.Vec2D;
 
 public class Pair {
     private long millis;
-    private Point point;
+    private Vec2D point;
 
-    public Pair ( long _d, Point _p ) {
+    public Pair ( long _d, Vec2D _p ) {
         this.millis = _d;
         this.point = _p;
     }
@@ -15,7 +15,7 @@ public class Pair {
         return millis;
     }
 
-    public Point getPoint () {
+    public Vec2D getPosition () {
         return point;
     }
 }
