@@ -5,6 +5,7 @@ import processing.core.PVector;
 import processing.data.Table;
 import processing.data.TableRow;
 import both.MousePath;
+import toxi.geom.Vec2D;
 
 import java.awt.*;
 
@@ -14,6 +15,7 @@ import java.awt.*;
 public class PathReader {
     private PApplet p;
     private MousePath path;
+    private String fileName;
 
     public PathReader ( PApplet p ) {
         this.p = p;
@@ -21,6 +23,7 @@ public class PathReader {
     }
 
     public void load ( String fileName ) {
+        this.fileName = fileName;
         path.clear();
         try {
             Table t = p.loadTable( p.sketchPath( fileName ), "header" );
@@ -28,9 +31,9 @@ public class PathReader {
                 long milli = r.getLong( "millis" );
                 int x = r.getInt( "x" );
                 int y = r.getInt( "y" );
-                path.addRaw( milli, new Point( x, y ) );
+                path.addRaw( milli, new Vec2D( x, y ) );
             }
-        } catch( NullPointerException e ) {
+        } catch ( NullPointerException e ) {
             System.out.println( e );
             e.printStackTrace();
         }
@@ -38,8 +41,12 @@ public class PathReader {
         path.finish();
     }
 
-    public MousePath getPath() {
+    public MousePath getPath () {
         return path;
+    }
+
+    public String getFileName () {
+        return fileName;
     }
 
 
