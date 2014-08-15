@@ -1,6 +1,7 @@
 package writing;
 
 import both.MousePath;
+import toxi.geom.Vec2D;
 
 import java.util.Date;
 
@@ -22,7 +23,7 @@ public class MouseRecognizer {
         recording = false;
     }
 
-    public void down ( java.awt.Point location, int mouseButton ) {
+    public void down ( Vec2D location, int mouseButton ) {
         counter++;
         if ( counter == 1 ) {
             recording = true;
@@ -42,11 +43,11 @@ public class MouseRecognizer {
         }
     }
 
-    public void up ( java.awt.Point location, int mouseButton ) {
+    public void up ( Vec2D location, int mouseButton ) {
 
     }
 
-    public void moved ( java.awt.Point location ) {
+    public void moved ( Vec2D location ) {
         if ( currentPath != null && recording == true ) {
             //System.out.println( location );
             this.currentPath.add( new Date().getTime(), location );

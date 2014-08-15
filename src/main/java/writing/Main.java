@@ -1,46 +1,66 @@
 package writing;
 
-import de.ksquared.system.mouse.GlobalMouseListener;
-import de.ksquared.system.mouse.MouseAdapter;
-import de.ksquared.system.mouse.MouseEvent;
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.mouse.NativeMouseEvent;
+import org.jnativehook.mouse.NativeMouseInputListener;
+import processing.core.PVector;
+import toxi.geom.Vec2D;
 
 import java.awt.*;
 
 /**
- * Created by Marcel on 05.08.2014.
+ * Created by Marcel on 10.08.2014.
  */
-public class Main {
+public class Main implements NativeMouseInputListener {
+    final TrayMenu tray = new TrayMenu();
+    final MouseRecognizer mouseRecognizer = new MouseRecognizer();
+
     public static void main ( String[] args ) {
 
-        final TrayMenu tray = new TrayMenu();
-        final MouseRecognizer mouseRecognizer = new MouseRecognizer();
-        new GlobalMouseListener().addMouseListener( new MouseAdapter() {
-            @Override
-            public void mousePressed ( MouseEvent event ) {
-                mouseRecognizer.down( new Point( event.getX(), event.getY() ), event.getButton() );
-            }
 
-            @Override
-            public void mouseReleased ( MouseEvent event ) {
-                mouseRecognizer.up( new Point( event.getX(), event.getY() ), event.getButton() );
-            }
+        try {
+            GlobalScreen.registerNativeHook();
+            System.out.println( "Successfully registered native hook." );
+        } catch ( NativeHookException ex ) {
+            System.err.println( "There was a problem registering the native hook." );
+            System.err.println( ex.getMessage() );
 
-            @Override
-            public void mouseMoved ( MouseEvent event ) {
-                mouseRecognizer.moved( new Point( event.getX(), event.getY() ) );
+            System.exit( 1 );
+        }
 
-                /*
-                if ( ( event.getButtons() & MouseEvent.BUTTON_LEFT ) != MouseEvent.BUTTON_NO
-                        && ( event.getButtons() & MouseEvent.BUTTON_RIGHT ) != MouseEvent.BUTTON_NO )
-                    System.out.println( "Both mouse buttons are currenlty pressed!" );
-                */
-            }
-        } );
-        while ( true )
-            try {
-                Thread.sleep( 100 );
-            } catch ( InterruptedException e ) {
-                e.printStackTrace();
-            }
+        //Construct the example object and initialze native hook.
+        Main hook = new Main();
+        GlobalScreen.getInstance().addNativeMouseListener( hook );
+        GlobalScreen.getInstance().addNativeMouseMotionListener( hook );
+    }
+
+    @Override
+    public void nativeMouseClicked ( NativeMouseEvent nativeMouseEvent ) {
+        System.out.println( nativeMouseEvent.getX() + " " + nativeMouseEvent.getY() );
+
+    }
+
+    @Override
+    public void nativeMousePressed ( NativeMouseEvent nativeMouseEvent ) {
+        System.out.println( nativeMouseEvent.getX() + " " + nativeMouseEvent.getY() );
+        mouseRecognizer.down( new Vec2D( nativeMouseEvent.getX(), nativeMouseEvent.getY() ), 0 );
+    }
+
+    @Override
+    public void nativeMouseReleased ( NativeMouseEvent nativeMouseEvent ) {
+        System.out.println( nativeMouseEvent.getX() + " " + nativeMouseEvent.getY() );
+        mouseRecognizer.up( new Vec2D( nativeMouseEvent.getX(), nativeMouseEvent.getY() ), 0 );
+    }
+
+    @Override
+    public void nativeMouseMoved ( NativeMouseEvent nativeMouseEvent ) {
+        System.out.println( nativeMouseEvent.getX() + " " + nativeMouseEvent.getY() );
+        mouseRecognizer.moved( new Vec2D( nativeMouseEvent.getX(), nativeMouseEvent.getY() ) );
+    }
+
+    @Override
+    public void nativeMouseDragged ( NativeMouseEvent nativeMouseEvent ) {
+
     }
 }
