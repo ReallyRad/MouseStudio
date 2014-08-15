@@ -1,13 +1,10 @@
 package reading;
 
 import processing.core.PApplet;
-import processing.core.PVector;
 import processing.data.Table;
 import processing.data.TableRow;
 import both.MousePath;
 import toxi.geom.Vec2D;
-
-import java.awt.*;
 
 /**
  * Created by Marcel on 07.08.2014.

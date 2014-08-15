@@ -4,10 +4,7 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
-import processing.core.PVector;
 import toxi.geom.Vec2D;
-
-import java.awt.*;
 
 /**
  * Created by Marcel on 10.08.2014.

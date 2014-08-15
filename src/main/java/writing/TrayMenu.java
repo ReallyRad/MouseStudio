@@ -1,13 +1,6 @@
 package writing;
 
-import com.sun.corba.se.spi.orbutil.fsm.Input;
-
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.ArrayList;
 
 /**
@@ -20,8 +13,6 @@ public class TrayMenu {
             return;
         }
         final PopupMenu popup = new PopupMenu();
-        //Image img = new ImageIcon(getClass().getResource("/images/bell-icon16.png")).getImage();
-        //System.out.println( getClass().getResource( "mouse-icon.png" ).getPath() );
         Image img = Toolkit.getDefaultToolkit().getImage( "mouse-icon.png" );
         final TrayIcon trayIcon =
                 new TrayIcon( img, "MouseRecorder", popup );

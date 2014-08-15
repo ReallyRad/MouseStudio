@@ -1,7 +1,6 @@
 package both;
 
 import processing.core.PApplet;
-import processing.core.PVector;
 import toxi.geom.Vec2D;
 import writing.InputTypeItemListener;
 

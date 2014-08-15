@@ -29,13 +29,10 @@ public class MouseRecognizer {
             recording = true;
             currentPath = new MousePath();
             currentPath.add( new Date().getTime(), location );
-            //System.out.println( "new path" );
         }
         if ( counter == 2 ) {
             recording = false;
             counter = 0;
-            //System.out.println( "finishing path" );
-            //System.out.println( currentPath );
             currentPath.add( new Date().getTime(), location );
             currentPath.finish();
             currentPath.export();
@@ -49,7 +46,6 @@ public class MouseRecognizer {
 
     public void moved ( Vec2D location ) {
         if ( currentPath != null && recording == true ) {
-            //System.out.println( location );
             this.currentPath.add( new Date().getTime(), location );
         }
     }
