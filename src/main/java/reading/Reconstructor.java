@@ -1,14 +1,13 @@
 package reading;
 
 import processing.core.PApplet;
-
-import java.awt.*;
+import toxi.geom.Vec2D;
 
 /**
  * Created by Marcel on 07.08.2014.
  */
 public class Reconstructor extends PApplet {
-    private PathManager paths;
+    private MouseMovementParser mouse;
 
     public void init () {
         frame.removeNotify();
@@ -20,36 +19,75 @@ public class Reconstructor extends PApplet {
     public void setup () {
         size( 1920, 1080 );
 
-        paths = new PathManager( this, "saved" );
+        mouse = new MouseMovementParser( this, "saved" );
+        mouse.setSpeed( 1 );
+        mouse.start();
+        mouse.setPathById( 10 );
     }
 
 
     public void draw () {
         background( 0 );
 
-        Point startPos = paths.getCurrentPath().getStartPos();
-        Point endPos = paths.getCurrentPath().getEndPos();
-        Point currentPos = paths.getCurrentPath().getPositionByMillis( millis() );
-
+        Vec2D startPos = mouse.getCurrentPath().getStartPos();
+        Vec2D endPos = mouse.getCurrentPath().getEndPos();
+        Vec2D currentPos = mouse.getCurrentPath().getPosition();
+        noStroke();
         fill( 255 );
-        ellipse( ( float ) ( currentPos.getX() ), ( float ) ( currentPos.getY() ), 15, 15 );
+        ellipse( currentPos.x, currentPos.y, 15, 15 );
         fill( 0, 255, 0 );
-        ellipse( ( float ) ( startPos.getX() ), ( float ) ( startPos.getY() ), 20, 20 );
+        ellipse( startPos.x, startPos.y, 20, 20 );
         fill( 0, 0, 255 );
-        ellipse( ( float ) ( endPos.getX() ), ( float ) ( endPos.getY() ), 20, 20 );
+        ellipse( endPos.x, endPos.y, 20, 20 );
 
+        Vec2D artificialStart = new Vec2D( 400, 400 );
+        Vec2D artificialEnd = new Vec2D( mouseX, mouseY );
+        Vec2D currArtificialPos = mouse.getCurrentPath().getPositionMapped( mouse.getCurrentPath().getPosition(), artificialStart, artificialEnd );
+
+        fill( 0, 255, 255 );
+        ellipse( currArtificialPos.x, currArtificialPos.y, 20, 20 );
+
+        for ( Vec2D p : mouse.getCurrentPath().getPoints() ) {
+            fill( 255, 180 );
+            noStroke();
+            ellipse( p.x, p.y, 3, 3 );
+        }
+
+        for ( Vec2D p : mouse.getCurrentPath().getPositionsMapped( artificialStart, artificialEnd ) ) {
+            fill( 255, 180 );
+            noStroke();
+            ellipse( p.x, p.y, 3, 3 );
+        }
+
+        stroke( 255, 255 );
+        strokeWeight( 1.5f );
+        line( currentPos.x, currentPos.y, currentPos.x + mouse.getCurrentPath().getAcceleration().x, currentPos.y + mouse.getCurrentPath().getAcceleration().y );
+
+        /*for ( Vec2D p : mouse.getCurrentPath().getPositionsScaledAndRotated( new Vec2D( mouseX, mouseY ), new Vec2D( mouseX + 300, mouseY + 200 ) ) ) {
+            fill( 255, 180 );
+            noStroke();
+            ellipse( p.x, p.y, 3, 3 );
+        }
+*/
         fill( 255 );
-        text( "Progress: " + paths.getProgress( millis() ), 10, 15 );
-        text( "Duration: " + paths.getCurrentPath().getDuration() + "ms", 10, 30 );
-        text( "Path N°: " + paths.getCurrentPathIndex() + " / " + paths.getPathCount(), 10, 45 );
-        text( "Valid: " + paths.getCurrentPath().isValid( this ), 10, 60 );
+        text( "Progress: " + mouse.getProgress(), 10, 15 );
+        text( "Duration: " + mouse.getCurrentPath().getDuration() + "ms", 10, 30 );
+        text( "Path N°: " + mouse.getCurrentPathIndex() + " / " + mouse.getPathCount(), 10, 45 );
+        text( "Valid: " + mouse.getCurrentPath().isValid( this ), 10, 60 );
+        text( "Filename: " + mouse.getCurrentFileName(), 10, 75 );
+        text( "Acceleration: " + mouse.getCurrentPath().getAcceleration(), 10, 90 );
+        text( "Distance: " + mouse.getCurrentPath().getDistance(), 10, 105 );
+        text( "Travel distance :" + mouse.getCurrentPath().getTravelDistance(), 10, 120 );
     }
 
 
     public void keyPressed () {
         switch ( key ) {
             case 'n':
-                paths.nextPath();
+                mouse.nextPath();
+                break;
+            case 'd':
+                mouse.deleteCurrent();
                 break;
         }
     }
