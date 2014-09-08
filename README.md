@@ -17,6 +17,6 @@ This repository contains code concerning issues of recording mouse paths in betw
 - distance traveled
 
 # Dependencies
-https://github.com/kwhat/jnativehook
-processing 2.2.1
-toxiclibs
+- https://github.com/kwhat/jnativehook
+- processing 2.2.1
+- toxiclibs
