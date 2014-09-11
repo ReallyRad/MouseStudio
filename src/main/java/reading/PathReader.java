@@ -6,6 +6,8 @@ import processing.data.TableRow;
 import both.MousePath;
 import toxi.geom.Vec2D;
 
+import java.awt.*;
+
 /**
  * Created by Marcel on 07.08.2014.
  */
@@ -23,7 +25,9 @@ public class PathReader {
         this.fileName = fileName;
         path.clear();
         try {
-            Table t = p.loadTable( p.sketchPath( fileName ), "header" );
+            String fileToLoad = p.sketchPath( fileName );
+            System.out.println( "Trying to load file: " + fileToLoad );
+            Table t = p.loadTable( fileToLoad, "header" );
             for ( TableRow r : t.rows() ) {
                 long milli = r.getLong( "millis" );
                 int x = r.getInt( "x" );
