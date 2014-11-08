@@ -6,9 +6,9 @@ import processing.core.PApplet;
 import toxi.geom.Vec2D;
 
 import java.awt.*;
-import java.awt.geom.Dimension2D;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by Marcel on 12.08.2014.
@@ -130,9 +130,13 @@ public class MouseMovement extends Thread {
         }
     }
 
-    public void checkAll () {
-        for ( PathReader r : mousePaths ) {
-            //r.getPath().isValid( 100 )
+    public void filterByDuration( int min, int max ) {
+        Iterator< PathReader > i = mousePaths.iterator();
+        while ( i.hasNext() ) {
+            PathReader r = i.next();
+            if( r.getPath().getDuration() < min || r.getPath().getDuration() > max ) {
+                i.remove();
+            }
         }
     }
 

@@ -1,27 +1,34 @@
 package writing;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 /**
  * Created by Marcel on 07.08.2014.
  */
 public class TrayMenu {
+    private static Logger log = Logger.getLogger( TrayMenu.class );
     public TrayMenu () {
+        log.setLevel( Level.OFF );
+
         if ( !SystemTray.isSupported() ) {
-            System.out.println( "SystemTray is not supported" );
+            log.fatal( "SystemTray is not supported" );
             return;
         }
         final PopupMenu popup = new PopupMenu();
-        Image img = Toolkit.getDefaultToolkit().getImage( "mouse-icon.png" );
+        Image img = Toolkit.getDefaultToolkit().getImage( "mouse-icon.gif" );
         final TrayIcon trayIcon =
-                new TrayIcon( img, "MouseRecorder", popup );
+                new TrayIcon( img, "Mouse Studio", popup );
+        trayIcon.setImageAutoSize( true );
         final SystemTray tray = SystemTray.getSystemTray();
 
         // Create a pop-up menu components
         MenuItem aboutItem = new MenuItem( "About" );
-        CheckboxMenuItem cb1 = new CheckboxMenuItem( "Set auto size" );
-        CheckboxMenuItem cb2 = new CheckboxMenuItem( "Set tooltip" );
         Menu inputTypeMenu = new Menu( "Input Type" );
 
         CheckboxMenuItem mouseInputItem = new CheckboxMenuItem( InputTypeItemListener.MOUSE_INPUT_TYPE );
@@ -41,14 +48,16 @@ public class TrayMenu {
         touchpadInputItem.addItemListener( new InputTypeItemListener( inputItems ) );
 
         MenuItem exitItem = new MenuItem( "Exit" );
-        exitItem.addActionListener( e -> System.exit( 0 ) );
+        exitItem.addActionListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.exit( 0 );
+                    }
+                });
 
         //Add components to pop-up menu
         popup.add( aboutItem );
-        popup.addSeparator();
-        popup.add( cb1 );
-        popup.add( cb2 );
-        popup.addSeparator();
         popup.add( inputTypeMenu );
         inputTypeMenu.add( mouseInputItem );
         inputTypeMenu.add( touchpadInputItem );

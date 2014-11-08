@@ -1,4 +1,4 @@
-package reading;
+package examples;
 
 /**
  * Created by Marcel on 16.08.2014.

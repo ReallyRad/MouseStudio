@@ -1,28 +1,33 @@
-package reading;
+package examples;
 
 import processing.core.PApplet;
+import reading.MouseMovement;
 import toxi.geom.Vec2D;
 
 /**
  * Created by Marcel on 07.08.2014.
  */
-public class Reconstructor extends PApplet {
-    private MouseMovementParser mouse;
+public class MainExample extends PApplet {
+    private MouseMovement mouse;
+    private int mousePathsToLoad = 200;
 
     public void init () {
         frame.removeNotify();
         frame.setUndecorated( true );
+        frame.setResizable( true );
         frame.addNotify();
         super.init();
     }
 
     public void setup () {
-        size( 1920, 1080 );
+        size( 1920, 1080, P2D );
 
-        mouse = new MouseMovementParser( this, "saved" );
+        mouse = new MouseMovement( this, "saved", mousePathsToLoad );
+        mouse.filterByDuration(1000, 5000 );
         mouse.setSpeed( 1 );
         mouse.start();
         mouse.setPathById( 10 );
+        mouse.setResolution( 1920, 1080 );
     }
 
 
@@ -62,8 +67,8 @@ public class Reconstructor extends PApplet {
         stroke( 255, 255 );
         strokeWeight( 1.5f );
         line( currentPos.x, currentPos.y, currentPos.x + mouse.getCurrentPath().getAcceleration().x, currentPos.y + mouse.getCurrentPath().getAcceleration().y );
-
-        /*for ( Vec2D p : mouse.getCurrentPath().getPositionsScaledAndRotated( new Vec2D( mouseX, mouseY ), new Vec2D( mouseX + 300, mouseY + 200 ) ) ) {
+/*
+        for ( Vec2D p : mouse.getCurrentPath().getPositionsScaledAndRotated( new Vec2D( mouseX, mouseY ), new Vec2D( mouseX + 300, mouseY + 200 ) ) ) {
             fill( 255, 180 );
             noStroke();
             ellipse( p.x, p.y, 3, 3 );
@@ -73,7 +78,7 @@ public class Reconstructor extends PApplet {
         text( "Progress: " + mouse.getProgress(), 10, 15 );
         text( "Duration: " + mouse.getCurrentPath().getDuration() + "ms", 10, 30 );
         text( "Path N°: " + mouse.getCurrentPathIndex() + " / " + mouse.getPathCount(), 10, 45 );
-        text( "Valid: " + mouse.getCurrentPath().isValid( this ), 10, 60 );
+        text( "Valid: " + mouse.getCurrentPath().isValid( 100, 2000 ), 10, 60 );
         text( "Filename: " + mouse.getCurrentFileName(), 10, 75 );
         text( "Acceleration: " + mouse.getCurrentPath().getAcceleration(), 10, 90 );
         text( "Distance: " + mouse.getCurrentPath().getDistance(), 10, 105 );
@@ -93,6 +98,6 @@ public class Reconstructor extends PApplet {
     }
 
     public static void main ( String[] args ) {
-        PApplet.main( new String[]{ "reading.Reconstructor" } );
+        PApplet.main( new String[]{ "examples.MainExample" } );
     }
 }

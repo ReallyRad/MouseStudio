@@ -17,7 +17,7 @@ public class MousePath {
 
     private DateFormat dateFormat = new SimpleDateFormat( "HHmmssSSS" );
 
-    private static final String FILENAME_PREFIX = "saved\\";
+    private static final String FILENAME_PREFIX = "saved" + File.separator;
     private static final String FILENAME_SUFFIX = ".csv";
 
     private ArrayList< Pair > pairs;

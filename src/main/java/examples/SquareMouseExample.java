@@ -1,6 +1,7 @@
-package reading;
+package examples;
 
 import processing.core.PApplet;
+import reading.MouseMovement;
 
 import java.util.ArrayList;
 
@@ -37,16 +38,16 @@ public class SquareMouseExample extends PApplet {
             Rect r = rects.get( i );
             //r.setPos( mouse.getPositionFromPath( i ) );
             //r.setSize( mouse.getPositionFromPath( i + rects.size() ).sub( mouse.getPositionFromPath(  i ) ) );
-            r.setCorner( reading.CORNER.TOP_RIGHT, mouse.getPositionFromPath( i ) );
-            r.setCorner( reading.CORNER.RIGHT_BOTTOM, mouse.getPositionFromPath( i + 1 ) );
-            r.setCorner( reading.CORNER.BOTTOM_LEFT, mouse.getPositionFromPath( i + 2 ) );
-            r.setCorner( reading.CORNER.LEFT_TOP, mouse.getPositionFromPath( i + 3 ) );
+            r.setCorner( examples.CORNER.TOP_RIGHT, mouse.getPositionFromPath( i ) );
+            r.setCorner( examples.CORNER.RIGHT_BOTTOM, mouse.getPositionFromPath( i + 1 ) );
+            r.setCorner( examples.CORNER.BOTTOM_LEFT, mouse.getPositionFromPath( i + 2 ) );
+            r.setCorner( examples.CORNER.LEFT_TOP, mouse.getPositionFromPath( i + 3 ) );
             r.draw();
         }
 
     }
 
     public static void main ( String[] args ) {
-        PApplet.main( new String[]{ "reading.SquareMouseExample" } );
+        PApplet.main( new String[]{ "examples.SquareMouseExample" } );
     }
 }
