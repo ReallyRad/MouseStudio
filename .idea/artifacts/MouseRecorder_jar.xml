@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MouseRecorder:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/MouseRecorder_jar</output-path>
+    <root id="archive" name="MouseRecorder.jar">
+      <element id="module-output" name="MouseRecorder" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/toxiclibscore.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/JNativeHook.jar" path-in-jar="/" />
+      <element id="library" level="project" name="toxiclibs_p5" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/log4j/log4j/1.2.17/log4j-1.2.17.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
