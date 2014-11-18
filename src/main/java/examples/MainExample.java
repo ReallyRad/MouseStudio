@@ -26,7 +26,7 @@ public class MainExample extends PApplet {
         mouse.filterByDuration(1000, 5000 );
         mouse.setSpeed( 1 );
         mouse.start();
-        mouse.setPathById( 10 );
+        mouse.setPathById( 59 );
         mouse.setResolution( 1920, 1080 );
     }
 
@@ -75,7 +75,7 @@ public class MainExample extends PApplet {
         }
 */
         fill( 255 );
-        text( "Progress: " + mouse.getProgress(), 10, 15 );
+        text( "Progress: " + mouse.getCurrentPath().getProgress(), 10, 15 );
         text( "Duration: " + mouse.getCurrentPath().getDuration() + "ms", 10, 30 );
         text( "Path N°: " + mouse.getCurrentPathIndex() + " / " + mouse.getPathCount(), 10, 45 );
         text( "Valid: " + mouse.getCurrentPath().isValid( 100, 2000 ), 10, 60 );

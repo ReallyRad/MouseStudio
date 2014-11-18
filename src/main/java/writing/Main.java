@@ -14,6 +14,7 @@ import toxi.geom.Vec2D;
  */
 public class Main implements NativeMouseInputListener {
     private static Logger log = Logger.getLogger( Main.class );
+    private static TrayMenu trayMenu;
 
     final MouseRecognizer mouseRecognizer = new MouseRecognizer();
 
@@ -32,6 +33,8 @@ public class Main implements NativeMouseInputListener {
     public void nativeMouseReleased ( NativeMouseEvent nativeMouseEvent ) {
         log.debug( "nativeMouseReleased -> " + nativeMouseEvent.getX() + " " + nativeMouseEvent.getY() );
         mouseRecognizer.up( new Vec2D( nativeMouseEvent.getX(), nativeMouseEvent.getY() ), 0 );
+
+        trayMenu.getDebugTextArea().append( "nativeMouseReleased -> " + nativeMouseEvent.getX() + " " + nativeMouseEvent.getY() + "\n" );
     }
 
     @Override
@@ -64,7 +67,7 @@ public class Main implements NativeMouseInputListener {
 
         // initialize the native hook.
         Main hook = new Main();
-        new TrayMenu();
+        trayMenu = new TrayMenu();
 
         GlobalScreen.getInstance().addNativeMouseListener( hook );
         GlobalScreen.getInstance().addNativeMouseMotionListener( hook );

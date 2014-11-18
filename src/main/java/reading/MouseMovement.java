@@ -99,13 +99,6 @@ public class MouseMovement extends Thread {
         return mousePaths.size();
     }
 
-    public float getProgress () {
-        long mil = getCurrentPath().getCurrentMillis();
-        float progress = mil / ( float ) getCurrentPath().getDuration();
-
-        return progress;
-    }
-
     public void start () {
         running = true;
         super.start();

@@ -6,6 +6,8 @@ import org.apache.log4j.Logger;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 /**
@@ -13,6 +15,20 @@ import java.util.ArrayList;
  */
 public class TrayMenu {
     private static Logger log = Logger.getLogger( TrayMenu.class );
+    private Frame debugFrame;
+    private DebugFIFO<String> debugOutput = new DebugFIFO<>( 20 );
+
+    public TextArea getDebugTextArea() {
+        return debugTextArea;
+    }
+
+    public void updateDebug( String newMessage ) {
+        debugOutput.add( newMessage );
+        //getDebugTextArea().set
+    }
+
+    private TextArea debugTextArea = new TextArea("Debug", 5, 30 );
+
     public TrayMenu () {
         log.setLevel( Level.OFF );
 
@@ -29,6 +45,13 @@ public class TrayMenu {
 
         // Create a pop-up menu components
         MenuItem aboutItem = new MenuItem( "About" );
+        MenuItem debugToggleItem = new MenuItem( "Debug" );
+        debugToggleItem.addActionListener( new ActionListener() {
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                debugFrame.setVisible( !debugFrame.isVisible() );
+            }
+        } );
         Menu inputTypeMenu = new Menu( "Input Type" );
 
         CheckboxMenuItem mouseInputItem = new CheckboxMenuItem( InputTypeItemListener.MOUSE_INPUT_TYPE );
@@ -58,6 +81,7 @@ public class TrayMenu {
 
         //Add components to pop-up menu
         popup.add( aboutItem );
+        popup.add( debugToggleItem );
         popup.add( inputTypeMenu );
         inputTypeMenu.add( mouseInputItem );
         inputTypeMenu.add( touchpadInputItem );
@@ -66,6 +90,12 @@ public class TrayMenu {
         popup.add( exitItem );
 
         trayIcon.setPopupMenu( popup );
+
+        debugFrame = new Frame("Debug");
+        debugFrame.setSize( 400, 500 );
+        debugFrame.add( debugTextArea );
+        debugFrame.pack();
+        debugFrame.setVisible( true );
 
         try {
             tray.add( trayIcon );

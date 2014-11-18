@@ -17,7 +17,7 @@ public class MousePath {
 
     private DateFormat dateFormat = new SimpleDateFormat( "HHmmssSSS" );
 
-    private static final String FILENAME_PREFIX = "saved" + File.separator;
+    private static final String FILENAME_PREFIX = "saved";
     private static final String FILENAME_SUFFIX = ".csv";
 
     private ArrayList< Pair > pairs;
@@ -36,6 +36,15 @@ public class MousePath {
         lastPoint = new Vec2D();
         acceleration = new Vec2D();
         playbackSpeed = 1.0f;
+
+        File newFolder = new File( FILENAME_PREFIX );
+        if( !newFolder.exists() ) {
+            try {
+                newFolder.mkdir();
+            } catch( SecurityException se ){
+
+            }
+        }
     }
 
     public ArrayList< Vec2D > getPoints () {
@@ -86,6 +95,13 @@ public class MousePath {
         return PApplet.dist( getStartPos().x, getStartPos().y, getEndPos().x, getEndPos().y );
     }
 
+    public float getProgress () {
+        long mil = getCurrentMillis();
+        float progress = mil / ( float ) getDuration();
+
+        return progress;
+    }
+
     public float getTravelDistance () {
         float dist = 0.0f;
 
@@ -104,7 +120,7 @@ public class MousePath {
 
     public void export () {
         try {
-            String fileName = FILENAME_PREFIX + InputTypeItemListener.CURRENT_INPUT_TYPE + getStartTime() + FILENAME_SUFFIX;
+            String fileName = FILENAME_PREFIX + File.separator + InputTypeItemListener.CURRENT_INPUT_TYPE + getStartTime() + FILENAME_SUFFIX;
             File file = createFile( fileName );
             BufferedWriter writer = new BufferedWriter( new FileWriter( file.getAbsoluteFile() ) );
 
@@ -134,7 +150,7 @@ public class MousePath {
 
     private void printHeader ( BufferedWriter writer ) {
         try {
-            writer.write( "index,millis,x,y\n" );
+            writer.write( "index,millis,x,y" + System.lineSeparator() );
         } catch ( IOException e ) {
             e.printStackTrace();
         }
@@ -150,19 +166,50 @@ public class MousePath {
         return "Length: " + pairs.size() + " Duration: " + getDuration();
     }
 
-    public Vec2D getPosition () {
+    /**
+     * Interpolates in between points and returns the absolute position of the mouse path indicated by the progress parameter
+     *
+     * @param progress percentage of the entire mouse path ( normalized
+     * @return the interpolated point
+     */
+    public Vec2D getPosition( float progress ) {
+        float prog = progress * ( getPoints().size() - 1 );
+        int startIndex = PApplet.floor( prog );
+        int endIndex = startIndex + 1;
+        float normalizedPercentageInBetween = prog - startIndex;
+        System.out.println( startIndex + " " + endIndex + " size: " + getPoints().size() );
+        Vec2D from = getPoints().get( startIndex );
+        Vec2D to = getPoints().get( endIndex );
 
+        Vec2D returnVector = new Vec2D( );
+
+        returnVector.x = mixValues( from.x, to.x, normalizedPercentageInBetween );
+        returnVector.y = mixValues( from.y, to.y, normalizedPercentageInBetween );
+        return returnVector;
+    }
+
+    /**
+     * Gives you the current position on the mouse path. the mouse path is being played back in the background.
+     * The position returned by this method is timed according to the real recording.
+     *
+     * See {@link #getPosition(float)} or {@link #getPoints()} for a different approach of accessing the data
+     * of a mouse path.
+     *
+     * @return
+     */
+    public Vec2D getPosition () {
         int pairIndex = 0;
         for ( Pair p : pairs ) {
-            long millis = ( long ) (p.getDate() * playbackSpeed);
-            if ( getCurrentMillis() < millis && pairIndex > 0 ) {
+            long millisCurrentPoint = ( long ) ( p.getDate() * playbackSpeed );
+            if ( getCurrentMillis() < millisCurrentPoint && pairIndex > 0 ) {
                 calculateAcceleration( p );
 
                 Vec2D returnVec = p.getPosition();
 
+
                 //Pair lastPair = pairs.get( pairIndex - 1 );
                 // long normalizedCurrentMillis = getCurrentMillis() - lastPair.getDate();
-                // long normalizedMillis = millis - lastPair.getDate();
+                // long normalizedMillis = millisCurrentPoint - lastPair.getDate();
                 // float factor = normalizedCurrentMillis / (float)normalizedMillis;
                 //Vec2D subbed = p.getPosition().sub( lastPair.getPosition() );
                 //subbed.limit( subbed.magnitude() * factor );
@@ -174,6 +221,10 @@ public class MousePath {
             pairIndex++;
         }
         return getStartPos();
+    }
+
+    private float mixValues( float begin, float end, float percentage ) {
+        return (( end - begin ) * percentage ) + begin;
     }
 
     private void calculateAcceleration ( Pair _pair ) {
@@ -262,6 +313,28 @@ public class MousePath {
         mil *= playbackSpeed;
 
         this.currentMillis = mil;
+    }
+
+    public ArrayList< Vec2D > getMorphed( MousePath toMorphTo, float percentage ) {
+        ArrayList< Vec2D > morphedPoints = new ArrayList<>(  );
+
+        for( float i = 0.0f; i < 1.0f; i += 0.001 ) {
+            System.out.println("progess: " + i);
+            Vec2D startPosition = getPosition( i );
+            Vec2D endPosition = toMorphTo.getPosition( i );
+
+            Vec2D morphed = new Vec2D();
+            morphed.x = mixValues( startPosition.x, endPosition.x, percentage );
+            morphed.y = mixValues( startPosition.y, endPosition.y, percentage );
+            morphedPoints.add( morphed );
+        }
+
+
+        return morphedPoints;
+    }
+
+    public void setCurrentMillis(  ) {
+
     }
 
     public long getCurrentMillis() {

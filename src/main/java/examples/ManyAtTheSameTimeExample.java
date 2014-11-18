@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public class ManyAtTheSameTimeExample extends PApplet {
     private MouseMovement mm;
-    int mousePathCount = 200;
+    int mousePathCount = 800;
 
     int selectedIndex = 1; // ( int ) map( mouseX, 0, width, 0, mousePathCount );
     int size = 2;
