@@ -6,7 +6,7 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseInputListener;
-import toxi.geom.Vec2D;
+import both.Vec2D;
 
 
 /**

@@ -1,7 +1,7 @@
 package writing;
 
 import both.MousePath;
-import toxi.geom.Vec2D;
+import both.Vec2D;
 
 import java.util.Date;
 

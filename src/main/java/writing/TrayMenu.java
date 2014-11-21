@@ -6,8 +6,6 @@ import org.apache.log4j.Logger;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 /**
@@ -16,7 +14,7 @@ import java.util.ArrayList;
 public class TrayMenu {
     private static Logger log = Logger.getLogger( TrayMenu.class );
     private Frame debugFrame;
-    private DebugFIFO<String> debugOutput = new DebugFIFO<>( 20 );
+    private DebugFIFO<String> debugOutput = new DebugFIFO<String>( 20 );
 
     public TextArea getDebugTextArea() {
         return debugTextArea;
@@ -60,7 +58,7 @@ public class TrayMenu {
         CheckboxMenuItem touchscreenInputItem = new CheckboxMenuItem( InputTypeItemListener.TOUCHPAD_INPUT_TYPE );
         mouseInputItem.setState( true );
 
-        ArrayList< CheckboxMenuItem > inputItems = new ArrayList<>();
+        ArrayList< CheckboxMenuItem > inputItems = new ArrayList< CheckboxMenuItem>();
         inputItems.add( mouseInputItem );
         inputItems.add( touchpadInputItem );
         inputItems.add( trackpointInputItem );
