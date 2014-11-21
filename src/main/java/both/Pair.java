@@ -1,7 +1,6 @@
 package both;
 
 import processing.core.PApplet;
-import toxi.geom.Vec2D;
 
 public class Pair {
     private long millis;

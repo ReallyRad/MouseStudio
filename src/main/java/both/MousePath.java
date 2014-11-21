@@ -1,7 +1,7 @@
 package both;
 
+import org.apache.log4j.Logger;
 import processing.core.PApplet;
-import toxi.geom.Vec2D;
 import writing.InputTypeItemListener;
 
 import java.io.*;
@@ -11,8 +11,15 @@ import java.util.*;
 
 /**
  * Created by Marcel on 05.08.2014.
+ * <p/>
+ * The MousePath class, which holds all information about a path. A path can be drawn with any kind of input, e.g.
+ * mouse, touch pad, graphics tablet and any other device that enables you to record discrete data of the timings
+ * and positions of small parts of the movement.
  */
 public class MousePath {
+    private static Logger log = Logger.getLogger( MousePath.class );
+
+    @SuppressWarnings( "unused" )
     private Date startTime, endTime;
 
     private DateFormat dateFormat = new SimpleDateFormat( "HHmmssSSS" );
@@ -22,32 +29,43 @@ public class MousePath {
 
     private ArrayList< Pair > pairs;
     private int index;
-    private String fileName;
     private long currentMillis;
     private Vec2D lastPoint;
     private Vec2D acceleration;
     private float playbackSpeed;
+    private String originalFileName;
 
-    public MousePath () {
+    public MousePath() {
         this.startTime = new Date();
-        pairs = new ArrayList<>();
-        index = 0;
-        currentMillis = 0;
-        lastPoint = new Vec2D();
-        acceleration = new Vec2D();
-        playbackSpeed = 1.0f;
+        this.endTime = new Date();
+        this.pairs = new ArrayList<>();
+        this.index = 0;
+        this.currentMillis = 0;
+        this.lastPoint = new Vec2D();
+        this.acceleration = new Vec2D();
+        this.playbackSpeed = 1.0f;
+        this.originalFileName = "no name";
 
         File newFolder = new File( FILENAME_PREFIX );
-        if( !newFolder.exists() ) {
+        if ( !newFolder.exists() ) {
             try {
-                newFolder.mkdir();
-            } catch( SecurityException se ){
-
+                boolean wasCreated = newFolder.mkdir();
+                log.info( "Created folder to store mouse paths into. The path was " + newFolder.toString() + ". Returned was " + wasCreated + "." );
+            } catch ( SecurityException se ) {
+                log.error( "Could not create folder to store mouse paths into. The path was" + newFolder.toString() );
             }
         }
     }
 
-    public ArrayList< Vec2D > getPoints () {
+    public void setOriginalFileName( String originalFileName ) {
+        this.originalFileName = originalFileName;
+    }
+
+    public String getOriginalFileName() {
+        return this.originalFileName;
+    }
+
+    public ArrayList< Vec2D > getPoints() {
         ArrayList< Vec2D > ps = new ArrayList<>();
         for ( Pair p : pairs ) {
             ps.add( p.getPosition() );
@@ -55,54 +73,47 @@ public class MousePath {
         return ps;
     }
 
-    public ArrayList< Pair > getPairs () {
+    public ArrayList< Pair > getPairs() {
         return pairs;
     }
 
-    public void add ( long milli, Vec2D _p ) {
-        if ( pairs != null ) {
-            pairs.add( new Pair( milli - startTime.getTime(), _p ) );
-        }
+    public void add( long milli, Vec2D _p ) {
+        pairs.add( new Pair( milli - startTime.getTime(), _p ) );
     }
 
-    public void addRaw ( long milli, Vec2D _p ) {
-        if ( pairs != null ) {
-            pairs.add( new Pair( milli, _p ) );
-        }
+    public void addRaw( long milli, Vec2D _p ) {
+        pairs.add( new Pair( milli, _p ) );
     }
 
-    public void finish () {
+    public void finish() {
         this.endTime = new Date();
     }
 
-    public Vec2D getStartPos () {
+    public Vec2D getStartPos() {
         return pairs.get( 0 ).getPosition();
     }
 
-    public Vec2D getEndPos () {
+    public Vec2D getEndPos() {
         return pairs.get( pairs.size() - 1 ).getPosition();
     }
 
-    public long getDuration () {
+    public long getDuration() {
         return pairs.get( pairs.size() - 1 ).getDate();
     }
 
-    public String getStartTime () {
+    public String getStartTime() {
         return dateFormat.format( Calendar.getInstance().getTime() );
     }
 
-    public float getDistance () {
+    public float getDistance() {
         return PApplet.dist( getStartPos().x, getStartPos().y, getEndPos().x, getEndPos().y );
     }
 
-    public float getProgress () {
-        long mil = getCurrentMillis();
-        float progress = mil / ( float ) getDuration();
-
-        return progress;
+    public float getProgress() {
+        return getCurrentMillis() / ( float ) getDuration();
     }
 
-    public float getTravelDistance () {
+    public float getTravelDistance() {
         float dist = 0.0f;
 
         int index = 0;
@@ -118,7 +129,7 @@ public class MousePath {
         return dist;
     }
 
-    public void export () {
+    public void export() {
         try {
             String fileName = FILENAME_PREFIX + File.separator + InputTypeItemListener.CURRENT_INPUT_TYPE + getStartTime() + FILENAME_SUFFIX;
             File file = createFile( fileName );
@@ -135,20 +146,21 @@ public class MousePath {
         }
     }
 
-    private File createFile ( String fileName ) {
+    private File createFile( String fileName ) {
         File file = new File( fileName );
-        try {
-            if ( !file.exists() ) {
-                file.createNewFile();
+        if ( !file.exists() ) {
+            try {
+                boolean wasCreated = file.createNewFile();
+                log.debug( "Created mouse path file " + file + ". " + wasCreated );
+            } catch ( IOException e ) {
+                log.error( "Could not create mouse path file: " + file );
             }
-        } catch ( IOException e ) {
-            e.printStackTrace();
         }
 
         return file;
     }
 
-    private void printHeader ( BufferedWriter writer ) {
+    private void printHeader( BufferedWriter writer ) {
         try {
             writer.write( "index,millis,x,y" + System.lineSeparator() );
         } catch ( IOException e ) {
@@ -156,13 +168,13 @@ public class MousePath {
         }
     }
 
-    public void clear () {
+    public void clear() {
         this.pairs.clear();
         this.startTime = new Date();
         index = 0;
     }
 
-    public String toString () {
+    public String toString() {
         return "Length: " + pairs.size() + " Duration: " + getDuration();
     }
 
@@ -177,11 +189,11 @@ public class MousePath {
         int startIndex = PApplet.floor( prog );
         int endIndex = startIndex + 1;
         float normalizedPercentageInBetween = prog - startIndex;
-        System.out.println( startIndex + " " + endIndex + " size: " + getPoints().size() );
+
         Vec2D from = getPoints().get( startIndex );
         Vec2D to = getPoints().get( endIndex );
 
-        Vec2D returnVector = new Vec2D( );
+        Vec2D returnVector = new Vec2D();
 
         returnVector.x = mixValues( from.x, to.x, normalizedPercentageInBetween );
         returnVector.y = mixValues( from.y, to.y, normalizedPercentageInBetween );
@@ -191,13 +203,13 @@ public class MousePath {
     /**
      * Gives you the current position on the mouse path. the mouse path is being played back in the background.
      * The position returned by this method is timed according to the real recording.
-     *
+     * <p/>
      * See {@link #getPosition(float)} or {@link #getPoints()} for a different approach of accessing the data
      * of a mouse path.
      *
-     * @return
+     * @return the current position
      */
-    public Vec2D getPosition () {
+    public Vec2D getPosition() {
         int pairIndex = 0;
         for ( Pair p : pairs ) {
             long millisCurrentPoint = ( long ) ( p.getDate() * playbackSpeed );
@@ -205,15 +217,6 @@ public class MousePath {
                 calculateAcceleration( p );
 
                 Vec2D returnVec = p.getPosition();
-
-
-                //Pair lastPair = pairs.get( pairIndex - 1 );
-                // long normalizedCurrentMillis = getCurrentMillis() - lastPair.getDate();
-                // long normalizedMillis = millisCurrentPoint - lastPair.getDate();
-                // float factor = normalizedCurrentMillis / (float)normalizedMillis;
-                //Vec2D subbed = p.getPosition().sub( lastPair.getPosition() );
-                //subbed.limit( subbed.magnitude() * factor );
-                //returnVec.addSelf( subbed );
 
                 lastPoint = p.getPosition();
                 return returnVec;
@@ -224,10 +227,10 @@ public class MousePath {
     }
 
     private float mixValues( float begin, float end, float percentage ) {
-        return (( end - begin ) * percentage ) + begin;
+        return ( ( end - begin ) * percentage ) + begin;
     }
 
-    private void calculateAcceleration ( Pair _pair ) {
+    private void calculateAcceleration( Pair _pair ) {
         // acceleration should not be calculated when jumpinmg from end to beginning of a mouse path
         if ( !( lastPoint.equalsWithTolerance( this.getEndPos(), 10.0f ) && _pair.getPosition().equalsWithTolerance( this.getStartPos(), 10.0f ) ) ) {
 
@@ -240,8 +243,7 @@ public class MousePath {
         }
     }
 
-    public Vec2D getPositionMapped ( Vec2D originalPoint, Vec2D newStartPoint, Vec2D newEndPoint ) {
-        Vec2D currentOriginalPoint = originalPoint;
+    public Vec2D getPositionMapped( Vec2D currentOriginalPoint, Vec2D newStartPoint, Vec2D newEndPoint ) {
         Vec2D originalStart = getStartPos();
         Vec2D originalEnd = getEndPos();
 
@@ -250,7 +252,43 @@ public class MousePath {
         return new Vec2D( ( int ) newX, ( int ) newY );
     }
 
-    public Vec2D getPositionScaledAndRotated ( Vec2D originalPoint, Vec2D newStartPoint, Vec2D newEndPoint ) {
+    public Vec2D getCurrentAcceleration() {
+        return acceleration;
+    }
+
+    /**
+     * @return boolean indicating if the path is valid according to the passed parameters
+     */
+    public boolean isValid( float minDistance, long maxDurationMillis ) {
+        boolean isDistanceValid = getStartPos().distanceTo( getEndPos() ) > minDistance;
+        boolean isDurationValid = getDuration() < maxDurationMillis;
+        return isDistanceValid && isDurationValid;
+    }
+
+    public ArrayList< Vec2D > getPositionsMapped( Vec2D artificialStart, Vec2D artificialEnd ) {
+        ArrayList< Vec2D > returnPoints = new ArrayList<>();
+
+        for ( Vec2D p : getPoints() ) {
+            Vec2D mapped = getPositionMapped( p, artificialStart, artificialEnd );
+            returnPoints.add( mapped );
+        }
+
+        return returnPoints;
+    }
+
+    /*
+    public ArrayList< Vec2D > getPositionsScaledAndRotated( Vec2D newStart, Vec2D newEnd ) {
+        ArrayList< Vec2D > returnPoints = new ArrayList< >();
+
+        for ( Vec2D p : getPoints() ) {
+            Vec2D mapped = getPositionScaledAndRotated( p, newStart, newEnd );
+            returnPoints.add( mapped );
+        }
+
+        return returnPoints;
+    }
+
+    public Vec2D getPositionScaledAndRotated( Vec2D originalPoint, Vec2D newStartPoint, Vec2D newEndPoint ) {
         Vec2D returnPoint = new Vec2D( originalPoint.x, originalPoint.y );
 
         // 1. move the point towards the new starting position start point
@@ -272,43 +310,10 @@ public class MousePath {
         return returnPoint;
     }
 
-    public Vec2D getAcceleration () {
-        return acceleration;
-    }
+    */
 
-    /**
-     * @return
-     */
-    public boolean isValid ( float minDistance, long maxDurationMillis ) {
-        boolean isDistanceValid = getStartPos().distanceTo( getEndPos() ) > minDistance;
-        boolean isDurationValid = getDuration() < maxDurationMillis;
-        return isDistanceValid && isDurationValid;
-    }
-
-    public ArrayList< Vec2D > getPositionsMapped ( Vec2D artificialStart, Vec2D artificialEnd ) {
-        ArrayList< Vec2D > returnPoints = new ArrayList<>();
-
-        for ( Vec2D p : getPoints() ) {
-            Vec2D mapped = getPositionMapped( p, artificialStart, artificialEnd );
-            returnPoints.add( mapped );
-        }
-
-        return returnPoints;
-    }
-
-    public ArrayList< Vec2D > getPositionsScaledAndRotated ( Vec2D newStart, Vec2D newEnd ) {
-        ArrayList< Vec2D > returnPoints = new ArrayList<>();
-
-        for ( Vec2D p : getPoints() ) {
-            Vec2D mapped = getPositionScaledAndRotated( p, newStart, newEnd );
-            returnPoints.add( mapped );
-        }
-
-        return returnPoints;
-    }
-
-    public void setCurrentMillis ( long _millis ) {
-        long duration =  ( long )( getDuration() / playbackSpeed );
+    public void setCurrentMillis( long _millis ) {
+        long duration = ( long ) ( getDuration() / playbackSpeed );
         long mil = _millis % duration;
         mil *= playbackSpeed;
 
@@ -316,10 +321,9 @@ public class MousePath {
     }
 
     public ArrayList< Vec2D > getMorphed( MousePath toMorphTo, float percentage ) {
-        ArrayList< Vec2D > morphedPoints = new ArrayList<>(  );
+        ArrayList< Vec2D > morphedPoints = new ArrayList<>();
 
-        for( float i = 0.0f; i < 1.0f; i += 0.001 ) {
-            System.out.println("progess: " + i);
+        for ( float i = 0.0f; i < 1.0f; i += 0.001 ) {
             Vec2D startPosition = getPosition( i );
             Vec2D endPosition = toMorphTo.getPosition( i );
 
@@ -329,19 +333,79 @@ public class MousePath {
             morphedPoints.add( morphed );
         }
 
-
         return morphedPoints;
     }
 
-    public void setCurrentMillis(  ) {
+    public MousePath getMorphedPath( MousePath toMorphTo, float percentage ) {
+        MousePath returnPath = new MousePath();
 
+        // todo
+
+        return returnPath;
+    }
+
+    public double getShannonEntropyX() {
+        double entropyX;
+
+        ArrayList< Integer > xTranslation = new ArrayList<>(  );
+        for( int i = 0; i < getPoints().size() - 2; i++ ) {
+            Vec2D from = getPoints().get( i );
+            Vec2D to = getPoints().get( i + 1 );
+            Vec2D translation = to.sub( from );
+            xTranslation.add( ( int )( Math.abs( translation.x ) ) );
+        }
+        entropyX = getShannonEntropy( xTranslation );
+
+        return entropyX;
+    }
+
+    public double getShannonEntropyY() {
+        double entropyY;
+
+        ArrayList< Integer > yTranslation = new ArrayList<>(  );
+        for( int i = 0; i < getPoints().size() - 2; i++ ) {
+            Vec2D from = getPoints().get( i );
+            Vec2D to = getPoints().get( i + 1 );
+            Vec2D translation = to.sub( from );
+            yTranslation.add( ( int ) (Math.abs( translation.y ) ) );
+        }
+        entropyY = getShannonEntropy( yTranslation );
+
+        return entropyY;
+    }
+
+    private double getShannonEntropy( ArrayList< Integer > s ) {
+        int n = 0;
+        Map<Integer, Integer> occ = new HashMap<>();
+
+        for (int c_ = 0; c_ < s.size(); ++c_) {
+            Integer cx = s.get( c_ );
+            if (occ.containsKey(cx)) {
+                occ.put(cx, occ.get(cx) + 1);
+            } else {
+                occ.put(cx, 1);
+            }
+            ++n;
+        }
+
+        double e = 0.0;
+        for (Map.Entry<Integer, Integer> entry : occ.entrySet()) {
+            Integer cx = entry.getKey();
+            double p = (double) entry.getValue() / n;
+            e += p * log2(p);
+        }
+        return -e;
+    }
+
+    private double log2(double a) {
+        return Math.log(a) / Math.log(2);
     }
 
     public long getCurrentMillis() {
         return currentMillis;
     }
 
-    public void setSpeed ( float _speed ) {
+    public void setSpeed( float _speed ) {
         playbackSpeed = _speed;
     }
 }
