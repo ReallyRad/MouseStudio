@@ -2,7 +2,7 @@ package examples;
 
 import both.MouseVisualizer;
 import processing.core.PApplet;
-import reading.MouseMovement;
+import both.MouseMovement;
 import toxi.geom.Vec2D;
 
 /**
@@ -10,17 +10,22 @@ import toxi.geom.Vec2D;
  */
 public class SimpleExample extends PApplet {
 
-   private MouseMovement mm;
+    private MouseMovement mm;
     private MouseVisualizer mv;
 
     public void setup() {
         size( 1920, 1080 );
 
-        mm = new MouseMovement( this, "saved", 20 );
+        mm = new MouseMovement( this );
+        mm.setDataFolder( "saved" );
+        mm.loadRecordings( 20 );
+        mm.setPathById( 20 );
         //mm.filterByDuration( 0, 1000 );
 
         mm.setSpeed( 1.0f );
         mm.start();
+
+        double xEntropy = mm.getCurrentPath().getShannonEntropyX();
 
         mv = new MouseVisualizer( this );
 
@@ -43,7 +48,7 @@ public class SimpleExample extends PApplet {
         fill( 255, 0, 0 );
         ellipse( mm.getCurrentPath().getPosition().x, mm.getCurrentPath().getPosition().y, 5, 5 );
 
-        mv.drawPathCurved( mm.getCurrentPath() );
+        mv.dawCurvedPath( mm.getCurrentPath() );
     }
 
     public void keyPressed () {

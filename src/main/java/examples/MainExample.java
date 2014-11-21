@@ -1,7 +1,7 @@
 package examples;
 
 import processing.core.PApplet;
-import reading.MouseMovement;
+import both.MouseMovement;
 import toxi.geom.Vec2D;
 
 /**
@@ -22,7 +22,9 @@ public class MainExample extends PApplet {
     public void setup () {
         size( 1920, 1080, P2D );
 
-        mouse = new MouseMovement( this, "saved", mousePathsToLoad );
+        mouse = new MouseMovement( this );
+        mouse.setDataFolder( "saved" );
+        mouse.loadRecordings( mousePathsToLoad );
         mouse.filterByDuration(1000, 5000 );
         mouse.setSpeed( 1 );
         mouse.start();
@@ -66,7 +68,7 @@ public class MainExample extends PApplet {
 
         stroke( 255, 255 );
         strokeWeight( 1.5f );
-        line( currentPos.x, currentPos.y, currentPos.x + mouse.getCurrentPath().getAcceleration().x, currentPos.y + mouse.getCurrentPath().getAcceleration().y );
+        line( currentPos.x, currentPos.y, currentPos.x + mouse.getCurrentPath().getCurrentAcceleration().x, currentPos.y + mouse.getCurrentPath().getCurrentAcceleration().y );
 /*
         for ( Vec2D p : mouse.getCurrentPath().getPositionsScaledAndRotated( new Vec2D( mouseX, mouseY ), new Vec2D( mouseX + 300, mouseY + 200 ) ) ) {
             fill( 255, 180 );
@@ -77,10 +79,10 @@ public class MainExample extends PApplet {
         fill( 255 );
         text( "Progress: " + mouse.getCurrentPath().getProgress(), 10, 15 );
         text( "Duration: " + mouse.getCurrentPath().getDuration() + "ms", 10, 30 );
-        text( "Path N°: " + mouse.getCurrentPathIndex() + " / " + mouse.getPathCount(), 10, 45 );
+        text( "Path N°: " + mouse.getCurrentPathIndex() + " / " + mouse.size(), 10, 45 );
         text( "Valid: " + mouse.getCurrentPath().isValid( 100, 2000 ), 10, 60 );
         text( "Filename: " + mouse.getCurrentFileName(), 10, 75 );
-        text( "Acceleration: " + mouse.getCurrentPath().getAcceleration(), 10, 90 );
+        text( "Acceleration: " + mouse.getCurrentPath().getCurrentAcceleration(), 10, 90 );
         text( "Distance: " + mouse.getCurrentPath().getDistance(), 10, 105 );
         text( "Travel distance :" + mouse.getCurrentPath().getTravelDistance(), 10, 120 );
     }

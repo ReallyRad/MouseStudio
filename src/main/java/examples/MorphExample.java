@@ -1,8 +1,7 @@
 package examples;
 
-import both.MousePath;
 import processing.core.PApplet;
-import reading.MouseMovement;
+import both.MouseMovement;
 import toxi.geom.Vec2D;
 
 import java.util.ArrayList;
@@ -33,7 +32,9 @@ public class MorphExample extends PApplet {
 
         currentPath = 1;
 
-        mm = new MouseMovement( this, "saved", 30 );
+        mm = new MouseMovement( this );
+        mm.setDataFolder( "saved" );
+        mm.loadRecordings( 30 );
         mm.start();
         mm.setResolution( displayWidth, displayHeight );
         mm.setPathById( currentPath );
@@ -56,13 +57,13 @@ public class MorphExample extends PApplet {
         ellipse( mm.getCurrentPath().getPositionMapped( mm.getCurrentPath().getPosition(), debugStart, debugEnd ).x, mm.getCurrentPath().getPositionMapped( mm.getCurrentPath().getPosition(), debugStart, debugEnd ).y, 20, 20 );
 
         noStroke();
-        ArrayList< Vec2D > morped = mm.getCurrentPath().getMorphed( mm.getPathFromId( 7 ), map(mouseX, 0, width, 0, 1 ) );
+        ArrayList< Vec2D > morped = mm.getCurrentPath().getMorphed( mm.getPathById( 7 ), map(mouseX, 0, width, 0, 1 ) );
         for( Vec2D v : morped ) {
             ellipse( v.x, v.y, 30, 30 );
         }
 
         fill( 0, 0, 255 );
-        //Vec2D gg = mm.getCurrentPath().getMorphed( mm.getPathFromId( 7 ), mm.getCurrentPath().getProgress() );
+        //Vec2D gg = mm.getCurrentPath().getMorphed( mm.getPathById( 7 ), mm.getCurrentPath().getProgress() );
         //ellipse(gg.x, gg.y, 20, 20);
 
         mm.setPathById( 7 );
@@ -88,7 +89,7 @@ public class MorphExample extends PApplet {
     public void keyPressed() {
         if( key == '+' ) {
             currentPath++;
-            currentPath = min( currentPath, mm.getPathCount() );
+            currentPath = min( currentPath, mm.size() );
         }
         if( key == '-' ) {
             currentPath--;

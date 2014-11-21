@@ -1,7 +1,7 @@
 package examples;
 
 import processing.core.PApplet;
-import reading.MouseMovement;
+import both.MouseMovement;
 
 import java.util.ArrayList;
 
@@ -13,25 +13,32 @@ public class SquareMouseExample extends PApplet {
     private MouseMovement mouse;
     ArrayList< Rect > rects;
 
-    /*
-    1. Punkte zur Delaunay Triangulatio nutzen
-    2. Interpolation zeischen zwei Punkten bei getPoint(), damit langsamer playback nicht 'ruckelt'
-    3. refactoring
-     */
+
+    public void init () {
+        frame.removeNotify();
+        frame.setUndecorated( true );
+        frame.setResizable( true );
+        frame.addNotify();
+        super.init();
+    }
+
     public void setup () {
-        size( 1920, 1080 );
-        mouse = new MouseMovement( this, "saved", 20 );
+        size( 1920, 1080, P2D );
+        mouse = new MouseMovement( this );
+        mouse.setDataFolder( "saved" );
+        mouse.loadRecordings( 200 );
         mouse.start();
 
         rects = new ArrayList<>();
-        int count = 20;
-        for ( int i = 0; i < count; i++ ) {
-            rects.add( new Rect( this, color( 255, 255 / count * i ) ) );
+
+        for ( int i = 0; i < mouse.size(); i++ ) {
+            rects.add( new Rect( this, color( 255, 10 ) ) );
         }
     }
 
     public void draw () {
-        mouse.setSpeed( map( mouseX, 0, width, 0.1f, 2 ) );
+        println(frameRate);
+        //mouse.setSpeed( map( mouseX, 0, width, 0.1f, 2 ) );
 
         background( 15 );
         for ( int i = 0; i < rects.size(); i += 4 ) {
