@@ -1,7 +1,6 @@
 package both;
 
 import processing.core.PApplet;
-import toxi.geom.Vec2D;
 
 import java.util.ArrayList;
 
@@ -51,9 +50,31 @@ public class MouseVisualizer {
         p.popStyle();
     }
 
+    public void draw( MousePath path ) {
+        p.pushStyle();
+        p.noStroke();
+        p.ellipse( path.getPosition().x, path.getPosition().y, 20, 20 );
+        p.popStyle();
+    }
+
     public void drawPaths( ArrayList< MousePath > paths ) {
         for( MousePath p : paths ) {
             this.drawRawPath( p );
         }
+    }
+
+    public void drawPointList( ArrayList< Vec2D > points ) {
+        p.pushStyle();
+        p.noFill();
+
+        p.beginShape();
+        p.curveVertex( points.get( 0 ).x, points.get( 0 ).y );
+        for( Vec2D v : points ) {
+            p.curveVertex( v.x, v.y );
+        }
+        p.curveVertex( points.get( points.size() - 1 ).x, points.get( points.size() - 1 ).y );
+        p.endShape();
+
+        p.popStyle();
     }
 }

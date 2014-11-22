@@ -16,7 +16,7 @@ import java.util.*;
  * mouse, touch pad, graphics tablet and any other device that enables you to record discrete data of the timings
  * and positions of small parts of the movement.
  */
-public class MousePath {
+public class MousePath extends Thread {
     private static Logger log = Logger.getLogger( MousePath.class );
 
     @SuppressWarnings( "unused" )
@@ -35,6 +35,9 @@ public class MousePath {
     private float playbackSpeed;
     private String originalFileName;
 
+    private boolean running;
+    private int wait;
+
     public MousePath() {
         this.startTime = new Date();
         this.endTime = new Date();
@@ -45,6 +48,8 @@ public class MousePath {
         this.acceleration = new Vec2D();
         this.playbackSpeed = 1.0f;
         this.originalFileName = "no name";
+        this.running = false;
+        this.wait = 4;
 
         File newFolder = new File( FILENAME_PREFIX );
         if ( !newFolder.exists() ) {
@@ -53,6 +58,27 @@ public class MousePath {
                 log.info( "Created folder to store mouse paths into. The path was " + newFolder.toString() + ". Returned was " + wasCreated + "." );
             } catch ( SecurityException se ) {
                 log.error( "Could not create folder to store mouse paths into. The path was" + newFolder.toString() );
+            }
+        }
+    }
+
+    public void start () {
+        running = true;
+        super.start();
+    }
+
+    public void quit () {
+        running = false;
+        interrupt();
+    }
+
+    public void run () {
+        while ( running ) {
+            try {
+                sleep( wait );
+                this.setCurrentMillis( System.currentTimeMillis() );
+            } catch ( Exception e ) {
+
             }
         }
     }
@@ -339,10 +365,19 @@ public class MousePath {
     public MousePath getMorphedPath( MousePath toMorphTo, float percentage ) {
         MousePath returnPath = new MousePath();
 
+        int max = PApplet.max( this.getPoints().size(), toMorphTo.getPoints().size() );
+        for( int i = 0; i < max; i++ ) {
+
+        }
+
+        for( Pair p : getPairs() ) {
+           // p.
+        }
         // todo
 
         return returnPath;
     }
+
 
     public double getShannonEntropyX() {
         double entropyX;

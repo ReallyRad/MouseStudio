@@ -55,4 +55,8 @@ public class Vec2D {
     public final Vec2D sub(Vec2D v) {
         return new Vec2D(x - v.x, y - v.y);
     }
+
+    public String toString() {
+        return "x: " + x + " y: " + y;
+    }
 }

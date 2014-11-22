@@ -1,5 +1,6 @@
 package both;
 
+import org.apache.log4j.Logger;
 import processing.core.PApplet;
 import processing.data.Table;
 import processing.data.TableRow;
@@ -8,14 +9,20 @@ import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Marcel on 12.08.2014.
+ *
+ * TODO:
+ * 1. Threaded file loader
+ * 2. morph exports valid mousepath
+ *
  */
-public class MouseMovement extends Thread {
+public class MouseMovement {
+    private static Logger log = Logger.getLogger( MouseMovement.class );
 
-    private int wait;
-    private boolean running;
 
     private PApplet p;
     private int currentPathIndex;
@@ -24,15 +31,13 @@ public class MouseMovement extends Thread {
     public static Dimension resolution;
     private String path = "saved";
 
-    public MouseMovement ( PApplet p) {
-        this.wait = 4;
-        this.running = false;
+    public MouseMovement () {
         this.speed = 1.0f;
-        this.p = p;
-        mousePaths = new ArrayList<>();
-        currentPathIndex = 0;
+        this.p = new PApplet();
+        this.mousePaths = new ArrayList<>();
+        this.currentPathIndex = 0;
 
-        resolution = new Dimension( 1920, 1080 );
+        this.resolution = new Dimension( 1920, 1080 );
         setResolution( ( int )( resolution.getWidth()), ( int )( resolution.getHeight() ) );
     }
 
@@ -48,13 +53,41 @@ public class MouseMovement extends Thread {
             return;
         }
         String[] files = recordingsPath.list();
-        int maxFiles = fileCount;
-        for ( int i = 0; i < files.length && i < maxFiles; i++ ) {
-            String s = files[ i ];
 
-            System.out.println( "Loaded " + i + " of " + maxFiles );
-            MousePath finishedPath = load( recordingsPath + File.separator + s );
-            mousePaths.add( finishedPath );
+        int maxFilesToLoad = Math.min( fileCount, files.length );
+
+        int numberOfLoaderThreads = Math.min(16, fileCount);
+        ExecutorService executor = Executors.newFixedThreadPool( numberOfLoaderThreads );
+        ArrayList< Runnable > loaders = new ArrayList<>(  );
+        for( int i = 0; i < numberOfLoaderThreads; i++ ) {
+            int from = maxFilesToLoad  / numberOfLoaderThreads * i;
+            int to = maxFilesToLoad / numberOfLoaderThreads * ( i + 1 );
+            ArrayList< String > fileNames = new ArrayList<>(  );
+            for( int j = from; j < to; j++ ) {
+                fileNames.add( files[ j ] );
+            }
+            Runnable worker = new MousePathLoader( recordingsPath.toString(), fileNames );
+            executor.execute( worker );
+            loaders.add( worker );
+        }
+
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+        }
+        for( int i = 0; i < numberOfLoaderThreads; i++ ) {
+            MousePathLoader loader = ( MousePathLoader ) loaders.get( i );
+            mousePaths.addAll( loader.getPaths() );
+        }
+    }
+
+    public void removeDoubleClicks() {
+        Iterator< MousePath > i = mousePaths.iterator();
+        while ( i.hasNext() ) {
+            MousePath p = i.next();
+            // there are usually many paths who only consist of two points at the same location ( a double click )
+            if( p.getPoints().size() < 3 ) {
+                i.remove();
+            }
         }
     }
 
@@ -63,7 +96,7 @@ public class MouseMovement extends Thread {
         path.clear();
         try {
             String fileToLoad = p.sketchPath( fileName );
-            System.out.println( "Trying to load file: " + fileToLoad );
+            log.info( "Trying to load file: " + fileToLoad );
             Table t = p.loadTable( fileToLoad, "header" );
             for ( TableRow r : t.rows() ) {
                 long milli = r.getLong( "millis" );
@@ -95,7 +128,7 @@ public class MouseMovement extends Thread {
         }
     }
 
-    public MousePath getCurrentPath () {
+    public MousePath getSelectedPath() {
         return mousePaths.get( currentPathIndex );
     }
 
@@ -116,13 +149,13 @@ public class MouseMovement extends Thread {
         }
     }
 
-    public MousePath getPathById( int id ) {
+    public MousePath get( int id ) {
         return mousePaths.get( id );
     }
 
     public Vec2D getPositionFromPath ( int pathId ) {
-        getPathById( pathId ).setCurrentMillis( getPathById( pathId ).getCurrentMillis() );
-        return getPathById( pathId ).getPosition();
+        get( pathId ).setCurrentMillis( get( pathId ).getCurrentMillis() );
+        return get( pathId ).getPosition();
     }
 
     public int getCurrentPathIndex () {
@@ -133,29 +166,6 @@ public class MouseMovement extends Thread {
     public int size() {
 
         return mousePaths.size();
-    }
-
-    public void start () {
-        running = true;
-        super.start();
-    }
-
-    public void quit () {
-        running = false;
-        interrupt();
-    }
-
-    public void run () {
-        while ( running ) {
-            try {
-                sleep( wait );
-                for ( MousePath p : mousePaths ) {
-                    p.setCurrentMillis( System.currentTimeMillis() );
-                }
-            } catch ( Exception e ) {
-
-            }
-        }
     }
 
     public ArrayList< MousePath > filterByDuration( int min, int max ) {
@@ -193,6 +203,20 @@ public class MouseMovement extends Thread {
             MousePath p = i.next();
             if( p.getShannonEntropyY() >= min && p.getShannonEntropyY() <= max ) {
                 filteredPaths.add( p );
+            }
+        }
+
+        return filteredPaths;
+    }
+
+    public ArrayList< MousePath > filterByShannonEntropy( float minX, float maxX, float minY, float maxY ) {
+        ArrayList< MousePath > filteredPaths = filterByShannonEntropyX( minX, maxX  );
+
+        Iterator< MousePath > i = filteredPaths.iterator();
+        while ( i.hasNext() ) {
+            MousePath p = i.next();
+            if( p.getShannonEntropyY() >= minX && p.getShannonEntropyY() <= maxX ) {
+                i.remove();
             }
         }
 
