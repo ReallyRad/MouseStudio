@@ -1,8 +1,8 @@
 package examples;
 
+import both.Vec2D;
 import processing.core.PApplet;
 import both.MouseMovement;
-import toxi.geom.Vec2D;
 
 import java.util.ArrayList;
 
@@ -28,10 +28,9 @@ public class ManyAtTheSameTimeExample extends PApplet {
         size( 1920, 1080, P2D );
         println(sketchFullScreen());
 
-        mm = new MouseMovement( this );
+        mm = new MouseMovement();
         mm.setDataFolder( "saved" );
         mm.loadRecordings( mousePathCount );
-        mm.start();
     }
 
     public void draw () {
@@ -49,7 +48,7 @@ public class ManyAtTheSameTimeExample extends PApplet {
             // fill( 255, 100, 0 );
             // }
             //fill( 255, 255, 0 );
-            for ( Vec2D p : mm.getPathById( i ).getPoints() ) {
+            for ( Vec2D p : mm.get( i ).getPoints() ) {
                  ellipse( p.x, p.y, size, size );
             }
 
@@ -58,7 +57,7 @@ public class ManyAtTheSameTimeExample extends PApplet {
             // ellipse( v.x, v.y, size*3, size*3 );
 
 
-            // for( Vec2D mapped : mm.getPathById( i ).getPositionsMapped( mm.getPathById( i ).getStartPos(), new Vec2D( mouseX, mouseY ) ) ) {
+            // for( Vec2D mapped : mm.get( i ).getPositionsMapped( mm.get( i ).getStartPos(), new Vec2D( mouseX, mouseY ) ) ) {
 //drawSelected( i );
         }
 
@@ -68,7 +67,7 @@ public class ManyAtTheSameTimeExample extends PApplet {
     private void drawSelected ( int selected ) {
         stroke( 255, 255, 0 );
         fill( 255, 255, 0 );
-        ArrayList< Vec2D > recordedPointsFromIndex = mm.getPathById( selected ).getPoints();
+        ArrayList< Vec2D > recordedPointsFromIndex = mm.get( selected ).getPoints();
         for ( Vec2D p : recordedPointsFromIndex ) {
             ellipse( p.x, p.y, size, size );
 
@@ -80,7 +79,7 @@ public class ManyAtTheSameTimeExample extends PApplet {
 
         stroke( 0, 0, 255 );
         fill( 0, 0, 255 );
-        ArrayList< Vec2D > mappedPointsFromIndex = mm.getPathById( selected ).getPositionsMapped( mm.getPathById( selected ).getStartPos(), new Vec2D( mouseX, mouseY ) );
+        ArrayList< Vec2D > mappedPointsFromIndex = mm.get( selected ).getPositionsMapped( mm.get( selected ).getStartPos(), new Vec2D( mouseX, mouseY ) );
         for ( Vec2D mapped : mappedPointsFromIndex ) {
             ellipse( mapped.x, mapped.y, 5, 5 );
             if ( mappedPointsFromIndex.indexOf( mapped ) > 0 ) {

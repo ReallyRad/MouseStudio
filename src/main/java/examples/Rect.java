@@ -1,8 +1,8 @@
 package examples;
 
+import both.Vec2D;
 import processing.core.PApplet;
 import processing.core.PConstants;
-import toxi.geom.Vec2D;
 
 /**
  * Created by Marcel on 16.08.2014.

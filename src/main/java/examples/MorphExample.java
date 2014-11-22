@@ -2,7 +2,7 @@ package examples;
 
 import processing.core.PApplet;
 import both.MouseMovement;
-import toxi.geom.Vec2D;
+import both.Vec2D;
 
 import java.util.ArrayList;
 
@@ -32,14 +32,13 @@ public class MorphExample extends PApplet {
 
         currentPath = 1;
 
-        mm = new MouseMovement( this );
+        mm = new MouseMovement();
         mm.setDataFolder( "saved" );
         mm.loadRecordings( 30 );
-        mm.start();
         mm.setResolution( displayWidth, displayHeight );
         mm.setPathById( currentPath );
 
-        System.out.println( "Duration: " + mm.getCurrentPath().getDuration() );
+        System.out.println( "Duration: " + mm.getSelectedPath().getDuration() );
     }
 
     public void draw() {
@@ -48,22 +47,22 @@ public class MorphExample extends PApplet {
 
         Vec2D debugStart = new Vec2D( width - 300, height / 2 - 200 );
         Vec2D debugEnd = new Vec2D( 300, height / 2 + 200 );
-        ArrayList< Vec2D > mapped = mm.getCurrentPath().getPositionsMapped( debugStart , debugEnd );
+        ArrayList< Vec2D > mapped = mm.getSelectedPath().getPositionsMapped( debugStart , debugEnd );
         fill( 255, 0, 0 );
         for( Vec2D p : mapped ) {
             //ellipse( p.x, p.y, 5, 5 );
         }
 
-        ellipse( mm.getCurrentPath().getPositionMapped( mm.getCurrentPath().getPosition(), debugStart, debugEnd ).x, mm.getCurrentPath().getPositionMapped( mm.getCurrentPath().getPosition(), debugStart, debugEnd ).y, 20, 20 );
+        ellipse( mm.getSelectedPath().getPositionMapped( mm.getSelectedPath().getPosition(), debugStart, debugEnd ).x, mm.getSelectedPath().getPositionMapped( mm.getSelectedPath().getPosition(), debugStart, debugEnd ).y, 20, 20 );
 
         noStroke();
-        ArrayList< Vec2D > morped = mm.getCurrentPath().getMorphed( mm.getPathById( 7 ), map(mouseX, 0, width, 0, 1 ) );
+        ArrayList< Vec2D > morped = mm.getSelectedPath().getMorphed( mm.get( 7 ), map(mouseX, 0, width, 0, 1 ) );
         for( Vec2D v : morped ) {
             ellipse( v.x, v.y, 30, 30 );
         }
 
         fill( 0, 0, 255 );
-        //Vec2D gg = mm.getCurrentPath().getMorphed( mm.getPathById( 7 ), mm.getCurrentPath().getProgress() );
+        //Vec2D gg = mm.getSelectedPath().getMorphed( mm.get( 7 ), mm.getSelectedPath().getProgress() );
         //ellipse(gg.x, gg.y, 20, 20);
 
         mm.setPathById( 7 );
@@ -74,12 +73,12 @@ public class MorphExample extends PApplet {
 
     private void drawCurrent() {
         fill( 255 );
-        for( Vec2D p : mm.getCurrentPath().getPoints() ) {
+        for( Vec2D p : mm.getSelectedPath().getPoints() ) {
             ellipse( p.x, p.y, 5, 5 );
         }
 
         fill( 0, 255, 0 );
-        ellipse( mm.getCurrentPath().getPosition().x, mm.getCurrentPath().getPosition().y, 30, 30 );
+        ellipse( mm.getSelectedPath().getPosition().x, mm.getSelectedPath().getPosition().y, 30, 30 );
     }
 
     public void mouseMoved() {

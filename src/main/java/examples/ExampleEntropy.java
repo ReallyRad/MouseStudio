@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 /**
  * Created by mar on 15.11.14.
+ *
+ * This shows how to filter some loaded movements by their entropy.
  */
 public class ExampleEntropy extends PApplet {
 
@@ -20,11 +22,12 @@ public class ExampleEntropy extends PApplet {
 
         mv = new MouseVisualizer( this );
 
-        MouseMovement mm = new MouseMovement( this );
+        MouseMovement mm = new MouseMovement();
         mm.setDataFolder( "saved" );
         mm.loadRecordings( 100 );
+        mm.removeDoubleClicks();
 
-        filtered = mm.filterByShannonEntropyY( 1.0f, 3.5f );
+        filtered = mm.filterByShannonEntropyY( 0.0f, 1.5f );
         System.out.println( "Filtered " + mm.size() + " to " + filtered.size() + " paths." );
     }
 

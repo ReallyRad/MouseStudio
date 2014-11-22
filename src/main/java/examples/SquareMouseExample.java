@@ -24,10 +24,9 @@ public class SquareMouseExample extends PApplet {
 
     public void setup () {
         size( 1920, 1080, P2D );
-        mouse = new MouseMovement( this );
+        mouse = new MouseMovement();
         mouse.setDataFolder( "saved" );
         mouse.loadRecordings( 200 );
-        mouse.start();
 
         rects = new ArrayList<>();
 

@@ -4,7 +4,7 @@ import both.MousePath;
 import processing.core.PApplet;
 import processing.core.PVector;
 import both.MouseMovement;
-import toxi.geom.Vec2D;
+import both.Vec2D;
 
 /**
  * Created by mar on 14.09.14.
@@ -21,17 +21,16 @@ public class MovedCubes extends PApplet {
             }
         }
 
-        mouse = new MouseMovement( this );
+        mouse = new MouseMovement();
         mouse.setDataFolder( "saved" );
         mouse.loadRecordings( 20 );
         mouse.setSpeed( 1 );
-        mouse.start();
         mouse.setPathById( 10 );
         mouse.setResolution( 1920, 1080 );
 
         noStroke();
         for( int i = 0; i < 10; i++ ) {
-            MousePath p = mouse.getPathById( i );
+            MousePath p = mouse.get( i );
             Vec2D start = p.getStartPos();
             Vec2D end = p.getEndPos();
             Vec2D diff = end.sub(start);

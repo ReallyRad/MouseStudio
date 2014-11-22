@@ -2,7 +2,7 @@ package examples;
 
 import processing.core.PApplet;
 import both.MouseMovement;
-import toxi.geom.Vec2D;
+import both.Vec2D;
 
 /**
  * Created by Marcel on 07.08.2014.
@@ -22,12 +22,11 @@ public class MainExample extends PApplet {
     public void setup () {
         size( 1920, 1080, P2D );
 
-        mouse = new MouseMovement( this );
+        mouse = new MouseMovement();
         mouse.setDataFolder( "saved" );
         mouse.loadRecordings( mousePathsToLoad );
         mouse.filterByDuration(1000, 5000 );
         mouse.setSpeed( 1 );
-        mouse.start();
         mouse.setPathById( 59 );
         mouse.setResolution( 1920, 1080 );
     }
@@ -36,9 +35,9 @@ public class MainExample extends PApplet {
     public void draw () {
         background( 0 );
 
-        Vec2D startPos = mouse.getCurrentPath().getStartPos();
-        Vec2D endPos = mouse.getCurrentPath().getEndPos();
-        Vec2D currentPos = mouse.getCurrentPath().getPosition();
+        Vec2D startPos = mouse.getSelectedPath().getStartPos();
+        Vec2D endPos = mouse.getSelectedPath().getEndPos();
+        Vec2D currentPos = mouse.getSelectedPath().getPosition();
         noStroke();
         fill( 255 );
         ellipse( currentPos.x, currentPos.y, 15, 15 );
@@ -49,18 +48,18 @@ public class MainExample extends PApplet {
 
         Vec2D artificialStart = new Vec2D( 400, 400 );
         Vec2D artificialEnd = new Vec2D( mouseX, mouseY );
-        Vec2D currArtificialPos = mouse.getCurrentPath().getPositionMapped( mouse.getCurrentPath().getPosition(), artificialStart, artificialEnd );
+        Vec2D currArtificialPos = mouse.getSelectedPath().getPositionMapped( mouse.getSelectedPath().getPosition(), artificialStart, artificialEnd );
 
         fill( 0, 255, 255 );
         ellipse( currArtificialPos.x, currArtificialPos.y, 20, 20 );
 
-        for ( Vec2D p : mouse.getCurrentPath().getPoints() ) {
+        for ( Vec2D p : mouse.getSelectedPath().getPoints() ) {
             fill( 255, 180 );
             noStroke();
             ellipse( p.x, p.y, 3, 3 );
         }
 
-        for ( Vec2D p : mouse.getCurrentPath().getPositionsMapped( artificialStart, artificialEnd ) ) {
+        for ( Vec2D p : mouse.getSelectedPath().getPositionsMapped( artificialStart, artificialEnd ) ) {
             fill( 255, 180 );
             noStroke();
             ellipse( p.x, p.y, 3, 3 );
@@ -68,23 +67,23 @@ public class MainExample extends PApplet {
 
         stroke( 255, 255 );
         strokeWeight( 1.5f );
-        line( currentPos.x, currentPos.y, currentPos.x + mouse.getCurrentPath().getCurrentAcceleration().x, currentPos.y + mouse.getCurrentPath().getCurrentAcceleration().y );
+        line( currentPos.x, currentPos.y, currentPos.x + mouse.getSelectedPath().getCurrentAcceleration().x, currentPos.y + mouse.getSelectedPath().getCurrentAcceleration().y );
 /*
-        for ( Vec2D p : mouse.getCurrentPath().getPositionsScaledAndRotated( new Vec2D( mouseX, mouseY ), new Vec2D( mouseX + 300, mouseY + 200 ) ) ) {
+        for ( Vec2D p : mouse.getSelectedPath().getPositionsScaledAndRotated( new Vec2D( mouseX, mouseY ), new Vec2D( mouseX + 300, mouseY + 200 ) ) ) {
             fill( 255, 180 );
             noStroke();
             ellipse( p.x, p.y, 3, 3 );
         }
 */
         fill( 255 );
-        text( "Progress: " + mouse.getCurrentPath().getProgress(), 10, 15 );
-        text( "Duration: " + mouse.getCurrentPath().getDuration() + "ms", 10, 30 );
+        text( "Progress: " + mouse.getSelectedPath().getProgress(), 10, 15 );
+        text( "Duration: " + mouse.getSelectedPath().getDuration() + "ms", 10, 30 );
         text( "Path N°: " + mouse.getCurrentPathIndex() + " / " + mouse.size(), 10, 45 );
-        text( "Valid: " + mouse.getCurrentPath().isValid( 100, 2000 ), 10, 60 );
+        text( "Valid: " + mouse.getSelectedPath().isValid( 100, 2000 ), 10, 60 );
         text( "Filename: " + mouse.getCurrentFileName(), 10, 75 );
-        text( "Acceleration: " + mouse.getCurrentPath().getCurrentAcceleration(), 10, 90 );
-        text( "Distance: " + mouse.getCurrentPath().getDistance(), 10, 105 );
-        text( "Travel distance :" + mouse.getCurrentPath().getTravelDistance(), 10, 120 );
+        text( "Acceleration: " + mouse.getSelectedPath().getCurrentAcceleration(), 10, 90 );
+        text( "Distance: " + mouse.getSelectedPath().getDistance(), 10, 105 );
+        text( "Travel distance :" + mouse.getSelectedPath().getTravelDistance(), 10, 120 );
     }
 
 
