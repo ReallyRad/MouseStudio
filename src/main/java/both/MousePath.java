@@ -78,7 +78,7 @@ public class MousePath extends Thread {
                 sleep( wait );
                 this.setCurrentMillis( System.currentTimeMillis() );
             } catch ( Exception e ) {
-
+                log.error( "Something is going wrong with the threads. " + e.getStackTrace());
             }
         }
     }
@@ -124,11 +124,15 @@ public class MousePath extends Thread {
     }
 
     public long getDuration() {
-        return pairs.get( pairs.size() - 1 ).getDate();
+        return pairs.get( pairs.size() - 1 ).getTime();
     }
 
-    public String getStartTime() {
+    public String getCreationTime() {
         return dateFormat.format( Calendar.getInstance().getTime() );
+    }
+
+    public void setStartTime( long _startTime ) {
+        startTime.setTime( _startTime );
     }
 
     public float getDistance() {
@@ -136,7 +140,8 @@ public class MousePath extends Thread {
     }
 
     public float getProgress() {
-        return getCurrentMillis() / ( float ) getDuration();
+        float returnProgress = ( float )getCurrentMillis() / ( float ) getDuration();
+        return returnProgress;
     }
 
     public float getTravelDistance() {
@@ -157,14 +162,14 @@ public class MousePath extends Thread {
 
     public void export() {
         try {
-            String fileName = FILENAME_PREFIX + File.separator + InputTypeItemListener.CURRENT_INPUT_TYPE + getStartTime() + FILENAME_SUFFIX;
+            String fileName = FILENAME_PREFIX + File.separator + InputTypeItemListener.CURRENT_INPUT_TYPE + getCreationTime() + FILENAME_SUFFIX;
             File file = createFile( fileName );
             BufferedWriter writer = new BufferedWriter( new FileWriter( file.getAbsoluteFile() ) );
 
             printHeader( writer );
 
             for ( Pair p : pairs ) {
-                writer.write( index + "," + p.getDate() + "," + ( int ) ( p.getPosition().x ) + "," + ( int ) ( p.getPosition().y ) + "\n" );
+                writer.write( index + "," + p.getTime() + "," + ( int ) ( p.getPosition().x ) + "," + ( int ) ( p.getPosition().y ) + "\n" );
             }
             writer.close();
         } catch ( IOException e ) {
@@ -200,6 +205,11 @@ public class MousePath extends Thread {
         index = 0;
     }
 
+    /**
+     * TODO
+     *
+     * @return
+     */
     public String toString() {
         return "Length: " + pairs.size() + " Duration: " + getDuration();
     }
@@ -235,10 +245,11 @@ public class MousePath extends Thread {
      *
      * @return the current position
      */
-    public Vec2D getPosition() {
+    public Vec2D getCurrentPosition() {
         int pairIndex = 0;
+
         for ( Pair p : pairs ) {
-            long millisCurrentPoint = ( long ) ( p.getDate() * playbackSpeed );
+            long millisCurrentPoint = ( long ) ( p.getTime() * playbackSpeed );
             if ( getCurrentMillis() < millisCurrentPoint && pairIndex > 0 ) {
                 calculateAcceleration( p );
 
@@ -342,7 +353,6 @@ public class MousePath extends Thread {
         long duration = ( long ) ( getDuration() / playbackSpeed );
         long mil = _millis % duration;
         mil *= playbackSpeed;
-
         this.currentMillis = mil;
     }
 
@@ -362,22 +372,45 @@ public class MousePath extends Thread {
         return morphedPoints;
     }
 
-    public MousePath getMorphedPath( MousePath toMorphTo, float percentage ) {
-        MousePath returnPath = new MousePath();
-
-        int max = PApplet.max( this.getPoints().size(), toMorphTo.getPoints().size() );
-        for( int i = 0; i < max; i++ ) {
-
-        }
-
-        for( Pair p : getPairs() ) {
-           // p.
-        }
-        // todo
-
-        return returnPath;
+    public int size() {
+        return this.getPoints().size();
     }
 
+    public MousePath getMorphedPath( MousePath toMorphTo, float percentage ) {
+        MousePath returnPath = new MousePath();
+        returnPath.clear();
+
+
+        int maxPoints = PApplet.max( this.size(), toMorphTo.size() );
+        long averageLength = ( getDuration() + toMorphTo.getDuration() ) / 2;
+
+        for( int i = 0; i < maxPoints; i++ ) {
+            // calculating the individual current indices. necessary when mapping one path to another
+            int thisIndex = (int)(((float)(i) / maxPoints) * this.size());
+            int toMorphToIndex = (int)(((float)(i) / maxPoints) * toMorphTo.size());
+            Vec2D morphedPosition = new Vec2D();
+            morphedPosition.x = mixValues( this.getPairs().get( thisIndex ).getPosition().x, toMorphTo.getPairs().get( toMorphToIndex ).getPosition().x, percentage );
+            morphedPosition.y = mixValues( this.getPairs().get( thisIndex ).getPosition().y, toMorphTo.getPairs().get( toMorphToIndex ).getPosition().y, percentage );
+
+            long thisTime = getPairs().get( thisIndex ).getTime();
+            long toMorphToTime = toMorphTo.getPairs().get( toMorphToIndex ).getTime();
+
+            float currentPercentage = (float)i / maxPoints;
+            long time = ( long ) (averageLength * currentPercentage);
+
+            // System.out.println( "Current Perc " + currentPercentage + "\t" + time + "\t" + morphedPosition );
+
+            long morphedTime = (long) mixValues( (float)(thisTime), (float)(toMorphToTime), percentage );
+
+            returnPath.addRaw( morphedTime, morphedPosition );
+        }
+
+        returnPath.setOriginalFileName( "GENERATED ON THE FLY" );
+        returnPath.setCurrentMillis( System.currentTimeMillis() );
+        returnPath.finish();
+        returnPath.start();
+        return returnPath;
+    }
 
     public double getShannonEntropyX() {
         double entropyX;

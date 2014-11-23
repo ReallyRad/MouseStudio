@@ -16,13 +16,11 @@ import java.util.concurrent.Executors;
  * Created by Marcel on 12.08.2014.
  *
  * TODO:
- * 1. Threaded file loader
  * 2. morph exports valid mousepath
  *
  */
 public class MouseMovement {
     private static Logger log = Logger.getLogger( MouseMovement.class );
-
 
     private PApplet p;
     private int currentPathIndex;
@@ -90,31 +88,6 @@ public class MouseMovement {
             }
         }
     }
-
-    private MousePath load ( String fileName ) {
-        MousePath path = new MousePath();
-        path.clear();
-        try {
-            String fileToLoad = p.sketchPath( fileName );
-            log.info( "Trying to load file: " + fileToLoad );
-            Table t = p.loadTable( fileToLoad, "header" );
-            for ( TableRow r : t.rows() ) {
-                long milli = r.getLong( "millis" );
-                int x = r.getInt( "x" );
-                int y = r.getInt( "y" );
-                path.addRaw( milli, new Vec2D( x, y ) );
-            }
-        } catch ( NullPointerException e ) {
-            System.out.println( e );
-            e.printStackTrace();
-        }
-
-        path.finish();
-        path.setOriginalFileName( fileName );
-
-        return path;
-    }
-
     public String getCurrentFileName () {
         return mousePaths.get( currentPathIndex ).getOriginalFileName();
     }
@@ -155,7 +128,7 @@ public class MouseMovement {
 
     public Vec2D getPositionFromPath ( int pathId ) {
         get( pathId ).setCurrentMillis( get( pathId ).getCurrentMillis() );
-        return get( pathId ).getPosition();
+        return get( pathId ).getCurrentPosition();
     }
 
     public int getCurrentPathIndex () {

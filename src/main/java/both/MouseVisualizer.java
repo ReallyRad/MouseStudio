@@ -16,11 +16,11 @@ public class MouseVisualizer {
 
     public void drawCurvedPaths( ArrayList< MousePath > paths ) {
         for( MousePath p : paths ) {
-            this.dawCurvedPath( p );
+            this.drawCurvedPath( p );
         }
     }
 
-    public void dawCurvedPath( MousePath path ) {
+    public void drawCurvedPath( MousePath path ) {
         p.pushStyle();
         p.noFill();
 
@@ -53,7 +53,7 @@ public class MouseVisualizer {
     public void draw( MousePath path ) {
         p.pushStyle();
         p.noStroke();
-        p.ellipse( path.getPosition().x, path.getPosition().y, 20, 20 );
+        p.ellipse( path.getCurrentPosition().x, path.getCurrentPosition().y, 20, 20 );
         p.popStyle();
     }
 

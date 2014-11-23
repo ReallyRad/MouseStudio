@@ -13,7 +13,7 @@ public class Pair {
         this.resolution = new Vec2D( 1920, 1080 );
     }
 
-    public long getDate () {
+    public long getTime() {
         return millis;
     }
 
