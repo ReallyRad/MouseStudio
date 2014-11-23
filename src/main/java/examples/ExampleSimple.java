@@ -3,7 +3,6 @@ package examples;
 import both.MouseVisualizer;
 import processing.core.PApplet;
 import both.MouseMovement;
-import both.Vec2D;
 
 /**
  * Created by mar on 15.11.14.
@@ -28,7 +27,7 @@ public class ExampleSimple extends PApplet {
         background( 0 );
 
         stroke( 255 );
-        mv.dawCurvedPath( mm.getSelectedPath() );
+        mv.drawCurvedPath( mm.getSelectedPath() );
 
         fill( 255, 0, 0 );
         mv.draw( mm.getSelectedPath() );

@@ -25,7 +25,7 @@ public class MainExample extends PApplet {
         mouse = new MouseMovement();
         mouse.setDataFolder( "saved" );
         mouse.loadRecordings( mousePathsToLoad );
-        mouse.filterByDuration(1000, 5000 );
+        mouse.filterByDuration( 1000, 5000 );
         mouse.setSpeed( 1 );
         mouse.setPathById( 59 );
         mouse.setResolution( 1920, 1080 );
@@ -37,7 +37,7 @@ public class MainExample extends PApplet {
 
         Vec2D startPos = mouse.getSelectedPath().getStartPos();
         Vec2D endPos = mouse.getSelectedPath().getEndPos();
-        Vec2D currentPos = mouse.getSelectedPath().getPosition();
+        Vec2D currentPos = mouse.getSelectedPath().getCurrentPosition();
         noStroke();
         fill( 255 );
         ellipse( currentPos.x, currentPos.y, 15, 15 );
@@ -48,7 +48,7 @@ public class MainExample extends PApplet {
 
         Vec2D artificialStart = new Vec2D( 400, 400 );
         Vec2D artificialEnd = new Vec2D( mouseX, mouseY );
-        Vec2D currArtificialPos = mouse.getSelectedPath().getPositionMapped( mouse.getSelectedPath().getPosition(), artificialStart, artificialEnd );
+        Vec2D currArtificialPos = mouse.getSelectedPath().getPositionMapped( mouse.getSelectedPath().getCurrentPosition(), artificialStart, artificialEnd );
 
         fill( 0, 255, 255 );
         ellipse( currArtificialPos.x, currArtificialPos.y, 20, 20 );

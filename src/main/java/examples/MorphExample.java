@@ -53,7 +53,7 @@ public class MorphExample extends PApplet {
             //ellipse( p.x, p.y, 5, 5 );
         }
 
-        ellipse( mm.getSelectedPath().getPositionMapped( mm.getSelectedPath().getPosition(), debugStart, debugEnd ).x, mm.getSelectedPath().getPositionMapped( mm.getSelectedPath().getPosition(), debugStart, debugEnd ).y, 20, 20 );
+        ellipse( mm.getSelectedPath().getPositionMapped( mm.getSelectedPath().getCurrentPosition(), debugStart, debugEnd ).x, mm.getSelectedPath().getPositionMapped( mm.getSelectedPath().getCurrentPosition(), debugStart, debugEnd ).y, 20, 20 );
 
         noStroke();
         ArrayList< Vec2D > morped = mm.getSelectedPath().getMorphed( mm.get( 7 ), map(mouseX, 0, width, 0, 1 ) );
@@ -78,7 +78,7 @@ public class MorphExample extends PApplet {
         }
 
         fill( 0, 255, 0 );
-        ellipse( mm.getSelectedPath().getPosition().x, mm.getSelectedPath().getPosition().y, 30, 30 );
+        ellipse( mm.getSelectedPath().getCurrentPosition().x, mm.getSelectedPath().getCurrentPosition().y, 30, 30 );
     }
 
     public void mouseMoved() {
