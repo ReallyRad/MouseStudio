@@ -2,6 +2,7 @@ package both;
 
 import org.apache.log4j.Logger;
 import processing.core.PApplet;
+import toxi.geom.Vec3D;
 import writing.InputTypeItemListener;
 
 import java.io.*;
@@ -19,7 +20,7 @@ import java.util.*;
 public class MousePath extends Thread {
     private static Logger log = Logger.getLogger( MousePath.class );
 
-    @SuppressWarnings( "unused" )
+    @SuppressWarnings("unused")
     private Date startTime, endTime;
 
     private DateFormat dateFormat = new SimpleDateFormat( "HHmmssSSS" );
@@ -62,23 +63,23 @@ public class MousePath extends Thread {
         }
     }
 
-    public void start () {
+    public void start() {
         running = true;
         super.start();
     }
 
-    public void quit () {
+    public void quit() {
         running = false;
         interrupt();
     }
 
-    public void run () {
+    public void run() {
         while ( running ) {
             try {
                 sleep( wait );
                 this.setCurrentMillis( System.currentTimeMillis() );
             } catch ( Exception e ) {
-                log.error( "Something is going wrong with the threads. " + e.getStackTrace());
+                log.error( "Something is going wrong with the threads. " + e.getStackTrace() );
             }
         }
     }
@@ -140,7 +141,7 @@ public class MousePath extends Thread {
     }
 
     public float getProgress() {
-        float returnProgress = ( float )getCurrentMillis() / ( float ) getDuration();
+        float returnProgress = ( float ) getCurrentMillis() / ( float ) getDuration();
         return returnProgress;
     }
 
@@ -378,49 +379,65 @@ public class MousePath extends Thread {
 
     public MousePath getMorphedPath( MousePath toMorphTo, float percentage ) {
         MousePath returnPath = new MousePath();
-        returnPath.clear();
-
 
         int maxPoints = PApplet.max( this.size(), toMorphTo.size() );
-        long averageLength = ( getDuration() + toMorphTo.getDuration() ) / 2;
 
-        for( int i = 0; i < maxPoints; i++ ) {
+        for ( int i = 0; i < maxPoints; i++ ) {
             // calculating the individual current indices. necessary when mapping one path to another
-            int thisIndex = (int)(((float)(i) / maxPoints) * this.size());
-            int toMorphToIndex = (int)(((float)(i) / maxPoints) * toMorphTo.size());
+            int thisIndex = ( int ) ( ( ( float ) ( i ) / maxPoints ) * this.size() );
+            int toMorphToIndex = ( int ) ( ( ( float ) ( i ) / maxPoints ) * toMorphTo.size() );
             Vec2D morphedPosition = new Vec2D();
+
             morphedPosition.x = mixValues( this.getPairs().get( thisIndex ).getPosition().x, toMorphTo.getPairs().get( toMorphToIndex ).getPosition().x, percentage );
             morphedPosition.y = mixValues( this.getPairs().get( thisIndex ).getPosition().y, toMorphTo.getPairs().get( toMorphToIndex ).getPosition().y, percentage );
 
             long thisTime = getPairs().get( thisIndex ).getTime();
             long toMorphToTime = toMorphTo.getPairs().get( toMorphToIndex ).getTime();
 
-            float currentPercentage = (float)i / maxPoints;
-            long time = ( long ) (averageLength * currentPercentage);
-
-            // System.out.println( "Current Perc " + currentPercentage + "\t" + time + "\t" + morphedPosition );
-
-            long morphedTime = (long) mixValues( (float)(thisTime), (float)(toMorphToTime), percentage );
+            long morphedTime = ( long ) mixValues( ( float ) ( thisTime ), ( float ) ( toMorphToTime ), percentage );
 
             returnPath.addRaw( morphedTime, morphedPosition );
         }
 
         returnPath.setOriginalFileName( "GENERATED ON THE FLY" );
         returnPath.setCurrentMillis( System.currentTimeMillis() );
-        returnPath.finish();
         returnPath.start();
+        return returnPath;
+    }
+
+    public MousePath3D get3dPath( MousePath additionalPath ) {
+        MousePath3D returnPath = new MousePath3D();
+
+        ArrayList< Vec2D > pointsFrom = getPoints();
+        ArrayList< Vec2D > pointsTo = additionalPath.getPositionsMapped( getStartPos(), getEndPos() );
+
+        int maxPoints = PApplet.max( pointsFrom.size(), pointsTo.size() );
+
+        for ( int i = 0; i < maxPoints; i++ ) {
+            // calculating the individual current indices. necessary when mapping one path to another
+            int thisIndex = ( int ) ( ( ( float ) ( i ) / maxPoints ) * pointsFrom.size() );
+            int additionalIndex = ( int ) ( ( ( float ) ( i ) / maxPoints ) * pointsTo.size() );
+
+            Vec3D toAdd = new Vec3D();
+            toAdd.x = pointsFrom.get( thisIndex ).x;
+            toAdd.y = pointsFrom.get( thisIndex ).y;
+            toAdd.z = pointsTo.get( additionalIndex ).y;
+
+            returnPath.add( toAdd );
+        }
+
         return returnPath;
     }
 
     public double getShannonEntropyX() {
         double entropyX;
 
-        ArrayList< Integer > xTranslation = new ArrayList<>(  );
-        for( int i = 0; i < getPoints().size() - 2; i++ ) {
+        ArrayList< Integer > xTranslation = new ArrayList<>();
+        for ( int i = 0; i < getPoints().size() - 2; i++ ) {
             Vec2D from = getPoints().get( i );
             Vec2D to = getPoints().get( i + 1 );
             Vec2D translation = to.sub( from );
-            xTranslation.add( ( int )( Math.abs( translation.x ) ) );
+            xTranslation.add( ( int ) ( Math.abs( translation.x ) ) );
         }
         entropyX = getShannonEntropy( xTranslation );
 
@@ -430,12 +447,12 @@ public class MousePath extends Thread {
     public double getShannonEntropyY() {
         double entropyY;
 
-        ArrayList< Integer > yTranslation = new ArrayList<>(  );
-        for( int i = 0; i < getPoints().size() - 2; i++ ) {
+        ArrayList< Integer > yTranslation = new ArrayList<>();
+        for ( int i = 0; i < getPoints().size() - 2; i++ ) {
             Vec2D from = getPoints().get( i );
             Vec2D to = getPoints().get( i + 1 );
             Vec2D translation = to.sub( from );
-            yTranslation.add( ( int ) (Math.abs( translation.y ) ) );
+            yTranslation.add( ( int ) ( Math.abs( translation.y ) ) );
         }
         entropyY = getShannonEntropy( yTranslation );
 
@@ -444,29 +461,29 @@ public class MousePath extends Thread {
 
     private double getShannonEntropy( ArrayList< Integer > s ) {
         int n = 0;
-        Map<Integer, Integer> occ = new HashMap<>();
+        Map< Integer, Integer > occ = new HashMap<>();
 
-        for (int c_ = 0; c_ < s.size(); ++c_) {
+        for ( int c_ = 0; c_ < s.size(); ++c_ ) {
             Integer cx = s.get( c_ );
-            if (occ.containsKey(cx)) {
-                occ.put(cx, occ.get(cx) + 1);
+            if ( occ.containsKey( cx ) ) {
+                occ.put( cx, occ.get( cx ) + 1 );
             } else {
-                occ.put(cx, 1);
+                occ.put( cx, 1 );
             }
             ++n;
         }
 
         double e = 0.0;
-        for (Map.Entry<Integer, Integer> entry : occ.entrySet()) {
+        for ( Map.Entry< Integer, Integer > entry : occ.entrySet() ) {
             Integer cx = entry.getKey();
-            double p = (double) entry.getValue() / n;
-            e += p * log2(p);
+            double p = ( double ) entry.getValue() / n;
+            e += p * log2( p );
         }
         return -e;
     }
 
-    private double log2(double a) {
-        return Math.log(a) / Math.log(2);
+    private double log2( double a ) {
+        return Math.log( a ) / Math.log( 2 );
     }
 
     public long getCurrentMillis() {
