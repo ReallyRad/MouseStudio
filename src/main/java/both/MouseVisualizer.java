@@ -1,6 +1,7 @@
 package both;
 
 import processing.core.PApplet;
+import toxi.geom.Vec3D;
 
 import java.util.ArrayList;
 
@@ -18,6 +19,44 @@ public class MouseVisualizer {
         for( MousePath p : paths ) {
             this.drawCurvedPath( p );
         }
+    }
+
+    public void drawCoordinateSystem() {
+        int length = 2000;
+
+        p.pushStyle();
+        p.strokeWeight( 3 );
+        p.stroke( 255, 0, 0 );
+        p.line( 0, 0, 0, length, 0, 0 );
+        p.stroke( 0, 255, 0 );
+        p.line( 0, 0, 0, 0, length, 0 );
+        p.stroke( 0, 0, 255 );
+        p.line( 0, 0, 0, 0, 0, length );
+
+        int steps = 10;
+        int stepLength = length / steps;
+        for( int i = 0; i < steps; i++ ) {
+            p.pushMatrix();
+            p.translate( i * stepLength, 0, 0 );
+            p.text( i * stepLength + "", 0, 0 );
+            p.popMatrix();
+
+            p.pushMatrix();
+            p.translate( 0, i * stepLength, 0 );
+            p.rotateZ( PApplet.radians( 90 ) );
+            p.text( i * stepLength + "", 0, 0 );
+            p.popMatrix();
+
+            p.pushMatrix();
+
+            p.translate( 0, 0, i * stepLength );
+            //p.rotateX( PApplet.radians( 90 ) );
+            p.rotateY( PApplet.radians( 90 ) );
+            p.text( i * stepLength + "", 0, 0 );
+            p.popMatrix();
+        }
+        p.popStyle();
+
     }
 
     public void drawCurvedPath( MousePath path ) {
@@ -45,6 +84,21 @@ public class MouseVisualizer {
             p.vertex( v.x, v.y );
         }
         p.vertex( path.getEndPos().x, path.getEndPos().y );
+        p.endShape();
+
+        p.popStyle();
+    }
+
+    public void drawRawPath( MousePath3D path ) {
+        p.pushStyle();
+        p.noFill();
+
+        p.beginShape();
+        p.vertex( path.getStartPos().x, path.getStartPos().y, path.getStartPos().z );
+        for( Vec3D v : path.getPoints() ) {
+            p.vertex( v.x, v.y, v.z );
+        }
+        p.vertex( path.getEndPos().x, path.getEndPos().y, path.getEndPos().z );
         p.endShape();
 
         p.popStyle();
