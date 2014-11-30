@@ -2,8 +2,6 @@ package both;
 
 import org.apache.log4j.Logger;
 import processing.core.PApplet;
-import processing.data.Table;
-import processing.data.TableRow;
 
 import java.awt.*;
 import java.io.File;
@@ -16,7 +14,8 @@ import java.util.concurrent.Executors;
  * Created by Marcel on 12.08.2014.
  *
  * TODO:
- * 2. morph exports valid mousepath
+ * 1. fix the getMapped functions to return valid MousePaths
+ * 2. create method to generate 3D paths from two 2d paths
  *
  */
 public class MouseMovement {
