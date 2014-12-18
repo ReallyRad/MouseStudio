@@ -24,6 +24,10 @@ public class Pair {
         return returnPoint;
     }
 
+    public void setPosition( Vec2D _p ) {
+        this.point = _p;
+    }
+
     public void setResolution( Vec2D _res ) {
         this.resolution = _res;
     }

@@ -113,7 +113,7 @@ public class MouseVisualizer {
 
     public void drawPaths( ArrayList< MousePath > paths ) {
         for( MousePath p : paths ) {
-            this.drawRawPath( p );
+                this.drawRawPath( p );
         }
     }
 
@@ -122,13 +122,29 @@ public class MouseVisualizer {
         p.noFill();
 
         p.beginShape();
-        p.curveVertex( points.get( 0 ).x, points.get( 0 ).y );
+        p.curveVertex( points.get( 0 ).x, points.get( 0 ).y, 0 );
         for( Vec2D v : points ) {
-            p.curveVertex( v.x, v.y );
+            p.curveVertex( v.x, v.y, 0 );
         }
-        p.curveVertex( points.get( points.size() - 1 ).x, points.get( points.size() - 1 ).y );
+        p.curveVertex( points.get( points.size() - 1 ).x, points.get( points.size() - 1 ).y, 0 );
         p.endShape();
 
         p.popStyle();
     }
+
+    public void drawPointList3D( ArrayList< Vec3D > points ) {
+        p.pushStyle();
+        p.noFill();
+
+        p.beginShape();
+        p.curveVertex( points.get( 0 ).x, points.get( 0 ).y, points.get( 0 ).z );
+        for( Vec3D v : points ) {
+            p.curveVertex( v.x, v.y, v.z );
+        }
+        p.curveVertex( points.get( points.size() - 1 ).x, points.get( points.size() - 1 ).y, points.get( points.size() - 1 ).z );
+        p.endShape();
+
+        p.popStyle();
+    }
+
 }

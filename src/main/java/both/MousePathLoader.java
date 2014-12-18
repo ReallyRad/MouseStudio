@@ -60,7 +60,6 @@ public class MousePathLoader extends Thread {
     public void run() {
         for( String s : fileNames ) {
             MousePath p = load( path + File.separator + s );
-            p.start();
             loadedPaths.add( p );
         }
 

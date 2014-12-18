@@ -2,6 +2,9 @@ package both;
 
 import org.apache.log4j.Logger;
 import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PVector;
+import toxi.geom.Rect;
 import toxi.geom.Vec3D;
 import writing.InputTypeItemListener;
 
@@ -17,27 +20,20 @@ import java.util.*;
  * mouse, touch pad, graphics tablet and any other device that enables you to record discrete data of the timings
  * and positions of small parts of the movement.
  */
-public class MousePath extends Thread {
-    private static Logger log = Logger.getLogger( MousePath.class );
-
-    @SuppressWarnings("unused")
-    private Date startTime, endTime;
-
-    private DateFormat dateFormat = new SimpleDateFormat( "HHmmssSSS" );
-
-    private static final String FILENAME_PREFIX = "saved";
+public class MousePath {
     private static final String FILENAME_SUFFIX = ".csv";
-
+    private static Logger log = Logger.getLogger( MousePath.class );
+    @SuppressWarnings( "unused" )
+    private Date startTime, endTime;
+    private DateFormat dateFormat = new SimpleDateFormat( "_dd_MM_yyyy__HH_mm_ss_SSS" );
     private ArrayList< Pair > pairs;
     private int index;
     private long currentMillis;
     private Vec2D lastPoint;
     private Vec2D acceleration;
+
     private float playbackSpeed;
     private String originalFileName;
-
-    private boolean running;
-    private int wait;
 
     public MousePath() {
         this.startTime = new Date();
@@ -49,47 +45,18 @@ public class MousePath extends Thread {
         this.acceleration = new Vec2D();
         this.playbackSpeed = 1.0f;
         this.originalFileName = "no name";
-        this.running = false;
-        this.wait = 4;
-
-        File newFolder = new File( FILENAME_PREFIX );
-        if ( !newFolder.exists() ) {
-            try {
-                boolean wasCreated = newFolder.mkdir();
-                log.info( "Created folder to store mouse paths into. The path was " + newFolder.toString() + ". Returned was " + wasCreated + "." );
-            } catch ( SecurityException se ) {
-                log.error( "Could not create folder to store mouse paths into. The path was" + newFolder.toString() );
-            }
-        }
     }
 
-    public void start() {
-        running = true;
-        super.start();
-    }
-
-    public void quit() {
-        running = false;
-        interrupt();
-    }
-
-    public void run() {
-        while ( running ) {
-            try {
-                sleep( wait );
-                this.setCurrentMillis( System.currentTimeMillis() );
-            } catch ( Exception e ) {
-                log.error( "Something is going wrong with the threads. " + e.getStackTrace() );
-            }
-        }
-    }
-
-    public void setOriginalFileName( String originalFileName ) {
-        this.originalFileName = originalFileName;
+    public void update() {
+        this.setCurrentMillis( System.currentTimeMillis() );
     }
 
     public String getOriginalFileName() {
         return this.originalFileName;
+    }
+
+    public void setOriginalFileName( String originalFileName ) {
+        this.originalFileName = originalFileName;
     }
 
     public ArrayList< Vec2D > getPoints() {
@@ -161,9 +128,11 @@ public class MousePath extends Thread {
         return dist;
     }
 
-    public void export() {
+    public void export( String folderToSaveTo ) {
         try {
-            String fileName = FILENAME_PREFIX + File.separator + InputTypeItemListener.CURRENT_INPUT_TYPE + getCreationTime() + FILENAME_SUFFIX;
+            String fileName = folderToSaveTo + File.separator + InputTypeItemListener.CURRENT_INPUT_TYPE + getCreationTime() + FILENAME_SUFFIX;
+            File folder = new File( folderToSaveTo );
+            folder.mkdirs();
             File file = createFile( fileName );
             BufferedWriter writer = new BufferedWriter( new FileWriter( file.getAbsoluteFile() ) );
 
@@ -314,47 +283,52 @@ public class MousePath extends Thread {
         return returnPoints;
     }
 
-    /*
-    public ArrayList< Vec2D > getPositionsScaledAndRotated( Vec2D newStart, Vec2D newEnd ) {
-        ArrayList< Vec2D > returnPoints = new ArrayList< >();
 
-        for ( Vec2D p : getPoints() ) {
-            Vec2D mapped = getPositionScaledAndRotated( p, newStart, newEnd );
-            returnPoints.add( mapped );
+    public MousePath getPositionsScaledAndRotated( Vec2D newStart, Vec2D newEnd ) {
+        MousePath mp = new MousePath();
+
+        // 1. scale
+        for ( Pair p : getPairs() ) {
+            Vec2D v = p.getPosition();
+            long time = p.getTime();
+
+            Vec2D generalDirectionOld = getEndPos().sub( getStartPos() );
+            Vec2D generalDirectionNew = newEnd.sub( newStart );
+            float magDifference = generalDirectionNew.magnitude() / generalDirectionOld.magnitude();
+            v.scaleSelf( magDifference );
+
+            mp.addRaw( time, v );
+        }
+        mp.update();
+
+
+
+        Vec2D currentStartToEnd = mp.getEndPos().sub( mp.getStartPos() );
+        Vec2D newStartToEnd = newEnd.sub( newStart );
+        currentStartToEnd = currentStartToEnd.normlize();
+        newStartToEnd = newStartToEnd.normlize();
+        float angle = currentStartToEnd.angleBetween( newStartToEnd );
+
+        // acos can't properly calculate angle more than 180°.
+        // solution taken from here: http://www.gamedev.net/topic/556500-angle-between-vectors/
+        if ( currentStartToEnd.x * newStartToEnd.y < currentStartToEnd.y * newStartToEnd.x ) {
+            angle = 2 * PApplet.PI - angle;
         }
 
-        return returnPoints;
-    }
-
-    public Vec2D getPositionScaledAndRotated( Vec2D originalPoint, Vec2D newStartPoint, Vec2D newEndPoint ) {
-        Vec2D returnPoint = new Vec2D( originalPoint.x, originalPoint.y );
-
-        // 1. move the point towards the new starting position start point
-        Vec2D distanceDiffStart = new Vec2D( newStartPoint.x - getStartPos().x, newStartPoint.y - getStartPos().y );
-        returnPoint.add( distanceDiffStart );
-
-        // 2. calculate the difference of angle rotate the new vector accordingly
-        float angleDiff =
-                new Vec2D( newStartPoint.x - returnPoint.x, newStartPoint.y - returnPoint.y ).angleBetween(
-                        new Vec2D( newStartPoint.x - newEndPoint.x, newStartPoint.y - newEndPoint.y ) );
-
-        returnPoint.rotate( angleDiff );
-
-        // 3. calc magnitude difference and add it to the new vector
-        float magnitudeDiff = new Vec2D( newStartPoint.x - newEndPoint.x, newStartPoint.y - newEndPoint.y ).magnitude() -
-                new Vec2D( newStartPoint.x - returnPoint.x, newStartPoint.y - returnPoint.y ).magnitude();
-        //returnPoint.setMagnitude( returnPoint.magnitude() - magnitudeDiff );
-
-        return returnPoint;
-    }
-
-    */
-
-    public void setCurrentMillis( long _millis ) {
-        long duration = ( long ) ( getDuration() / playbackSpeed );
-        long mil = _millis % duration;
-        mil *= playbackSpeed;
-        this.currentMillis = mil;
+        // 3. rotate
+        for ( Pair p : mp.getPairs() ) {
+            Vec2D v = p.getPosition();
+            v.rotate( angle );
+            p.setPosition( v );
+        }
+// 2. translate
+        Vec2D translation = newStart.sub( mp.getStartPos() );
+        for ( Pair p : mp.getPairs() ) {
+            Vec2D v = p.getPosition();
+            v.addSelf( translation );
+            p.setPosition( v );
+        }
+        return mp;
     }
 
     public ArrayList< Vec2D > getMorphed( MousePath toMorphTo, float percentage ) {
@@ -400,16 +374,28 @@ public class MousePath extends Thread {
         }
 
         returnPath.setOriginalFileName( "GENERATED ON THE FLY" );
-        returnPath.setCurrentMillis( System.currentTimeMillis() );
-        returnPath.start();
+        returnPath.update();
         return returnPath;
     }
 
-    public MousePath3D get3dPath( MousePath additionalPath ) {
+    public MousePath getMapped( Vec2D artificialStart, Vec2D artificialEnd ) {
+        MousePath returnPath = new MousePath();
+
+        for ( Pair p : getPairs() ) {
+            returnPath.addRaw( p.getTime(), getPositionMapped( p.getPosition(), artificialStart, artificialEnd ) );
+        }
+        returnPath.setOriginalFileName( "GENERATED ON THE FLY" );
+        returnPath.update();
+
+        return returnPath;
+    }
+
+    public MousePath3D get3dPath( MousePath additionalPath, boolean xOrY ) {
         MousePath3D returnPath = new MousePath3D();
 
         ArrayList< Vec2D > pointsFrom = getPoints();
-        ArrayList< Vec2D > pointsTo = additionalPath.getPositionsMapped( getStartPos(), getEndPos() );
+        MousePath toPathNormalized = additionalPath.getNormalized();
+        ArrayList< Vec2D > pointsTo = toPathNormalized.getPoints();
 
         int maxPoints = PApplet.max( pointsFrom.size(), pointsTo.size() );
 
@@ -421,8 +407,11 @@ public class MousePath extends Thread {
             Vec3D toAdd = new Vec3D();
             toAdd.x = pointsFrom.get( thisIndex ).x;
             toAdd.y = pointsFrom.get( thisIndex ).y;
-            toAdd.z = pointsTo.get( additionalIndex ).y;
-
+            if ( xOrY ) {
+                toAdd.z = pointsTo.get( additionalIndex ).x;
+            } else {
+                toAdd.z = pointsTo.get( additionalIndex ).y;
+            }
             returnPath.add( toAdd );
         }
 
@@ -490,7 +479,65 @@ public class MousePath extends Thread {
         return currentMillis;
     }
 
+    public void setCurrentMillis( long _millis ) {
+        long duration = ( long ) ( getDuration() / playbackSpeed );
+        long mil = _millis % duration;
+        mil *= playbackSpeed;
+        this.currentMillis = mil;
+    }
+
     public void setSpeed( float _speed ) {
         playbackSpeed = _speed;
+    }
+
+    public Vec2D getCentroid() {
+        Vec2D centroid = new Vec2D();
+
+        for ( Vec2D v : getPoints() ) {
+            centroid.addSelf( v );
+        }
+
+        centroid.divSelf( getPoints().size() );
+        return centroid;
+    }
+
+    public MousePath getNormalized() {
+        MousePath returnPath = new MousePath();
+
+        for ( int i = 0; i < getPairs().size(); i++ ) {
+            Vec2D morphedPosition = getPairs().get( i ).getPosition().sub( getCentroid() );
+            long time = getPairs().get( i ).getTime();
+            returnPath.addRaw( time, morphedPosition );
+        }
+
+        returnPath.setOriginalFileName( "GENERATED ON THE FLY" );
+        returnPath.update();
+        return returnPath;
+    }
+
+    public void translateSelf( Vec2D _v ) {
+        for ( Pair p : getPairs() ) {
+            Vec2D pos = p.getPosition();
+            pos.addSelf( _v );
+            p.setPosition( pos );
+        }
+    }
+
+    public void scaleSelf( Vec2D _v ) {
+        for ( Pair p : getPairs() ) {
+            Vec2D pos = p.getPosition();
+            pos.multSelf( _v );
+            p.setPosition( pos );
+        }
+    }
+
+    public boolean isInBoundingBox( Rect bb ) {
+        for ( Pair p : getPairs() ) {
+            Vec2D pos = p.getPosition();
+            if ( pos.x < bb.getLeft() || pos.x > bb.getRight() || pos.y < bb.getTop() || pos.y > bb.getBottom() ) {
+                return false;
+            }
+        }
+        return true;
     }
 }

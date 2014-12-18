@@ -26,7 +26,7 @@ public class MouseMovement {
     private ArrayList< MousePath > mousePaths;
     private float speed;
     public static Dimension resolution;
-    private String path = "saved";
+    private String path = "new_beginning";
 
     public MouseMovement () {
         this.speed = 1.0f;
@@ -36,6 +36,12 @@ public class MouseMovement {
 
         this.resolution = new Dimension( 1920, 1080 );
         setResolution( ( int )( resolution.getWidth()), ( int )( resolution.getHeight() ) );
+    }
+
+    public void update() {
+        for( MousePath mp : mousePaths ) {
+            mp.update();
+        }
     }
 
     public void setDataFolder( String folder ) {
@@ -73,8 +79,23 @@ public class MouseMovement {
         }
         for( int i = 0; i < numberOfLoaderThreads; i++ ) {
             MousePathLoader loader = ( MousePathLoader ) loaders.get( i );
-            mousePaths.addAll( loader.getPaths() );
+            for( MousePath p : loader.getPaths() ) {
+                if( p.getPairs().size() > 2 ) {
+                    mousePaths.add( p );
+                } else {
+                    log.info( "Not adding MousePath " + p.getOriginalFileName() + " due to small point set." );
+                }
+            }
         }
+    }
+
+    public int getAvailableRecordingCount() {
+        File recordingsPath = new File( p.sketchPath( this.path ) );
+        if ( !recordingsPath.exists() ) {
+            System.out.println( "There is no folder with the name " + this.path + " specified." );
+            return 0;
+        }
+        return recordingsPath.list().length;
     }
 
     public void removeDoubleClicks() {
@@ -153,6 +174,16 @@ public class MouseMovement {
         return filteredPaths;
     }
 
+    public void filterSelfByDuration( int min, int max ) {
+        Iterator< MousePath > i = mousePaths.iterator();
+        while ( i.hasNext() ) {
+            MousePath p = i.next();
+            if( p.getDuration() <= min || p.getDuration() >= max ) {
+                i.remove();
+            }
+        }
+    }
+
     public ArrayList< MousePath > filterByShannonEntropyX( float min, float max ) {
         ArrayList< MousePath > filteredPaths = new ArrayList<>();
 
@@ -223,6 +254,16 @@ public class MouseMovement {
         return filteredPaths;
     }
 
+    public void filterSelfByTravelDistance( float min, float max ) {
+        Iterator< MousePath > i = mousePaths.iterator();
+        while ( i.hasNext() ) {
+            MousePath p = i.next();
+            if( p.getTravelDistance() <= min || p.getTravelDistance() >= max ) {
+                i.remove();
+            }
+        }
+    }
+
     public void setSpeed ( float _speed ) {
         this.speed = _speed;
         for ( MousePath p : mousePaths ) {
@@ -240,5 +281,9 @@ public class MouseMovement {
                 pair.setResolution( new Vec2D( _width, _height ) );
             }
         }
+    }
+
+    public void selectPath( int _selectedPath ) {
+        currentPathIndex = _selectedPath;
     }
 }
