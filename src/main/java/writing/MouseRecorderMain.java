@@ -12,11 +12,12 @@ import both.Vec2D;
 /**
  * Created by Marcel on 10.08.2014.
  */
-public class Main implements NativeMouseInputListener {
-    private static Logger log = Logger.getLogger( Main.class );
+public class MouseRecorderMain implements NativeMouseInputListener {
+    private static Logger log = Logger.getLogger( MouseRecorderMain.class );
     private static TrayMenu trayMenu;
+    private final String folderToSaveTo = "new_stuff";
 
-    final MouseRecognizer mouseRecognizer = new MouseRecognizer();
+    final MouseRecognizer mouseRecognizer = new MouseRecognizer( folderToSaveTo );
 
     @Override
     public void nativeMouseClicked ( NativeMouseEvent nativeMouseEvent ) {
@@ -66,7 +67,7 @@ public class Main implements NativeMouseInputListener {
         }
 
         // initialize the native hook.
-        Main hook = new Main();
+        MouseRecorderMain hook = new MouseRecorderMain();
         trayMenu = new TrayMenu();
 
         GlobalScreen.getInstance().addNativeMouseListener( hook );
