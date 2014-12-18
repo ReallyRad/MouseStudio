@@ -17,10 +17,12 @@ public class MouseRecognizer {
     private MousePath currentPath;
     private int counter;
     private boolean recording;
+    private String folderToSaveTo;
 
-    public MouseRecognizer () {
+    public MouseRecognizer ( String folderToSaveTo ) {
         counter = 0;
         recording = false;
+        this.folderToSaveTo = folderToSaveTo;
     }
 
     public void down ( Vec2D location, int mouseButton ) {
@@ -35,7 +37,7 @@ public class MouseRecognizer {
             counter = 0;
             currentPath.add( new Date().getTime(), location );
             currentPath.finish();
-            currentPath.export();
+            currentPath.export( folderToSaveTo );
             currentPath.clear();
         }
     }
