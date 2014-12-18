@@ -20,11 +20,12 @@ public class ExampleSimple extends PApplet {
         mm.loadRecordings( 10 );
 
         mv = new MouseVisualizer( this );
-
     }
 
     public void draw() {
         background( 0 );
+
+        mm.update();
 
         stroke( 255 );
         mv.drawCurvedPath( mm.getSelectedPath() );

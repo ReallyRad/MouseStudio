@@ -17,6 +17,14 @@ public class ExampleEntropy extends PApplet {
     private MouseVisualizer mv;
     private ArrayList< MousePath > filtered;
 
+    public void init () {
+        frame.removeNotify();
+        frame.setUndecorated( true );
+        frame.setResizable( true );
+        frame.addNotify();
+        super.init();
+    }
+
     public void setup() {
         size( 1920, 1080 );
 

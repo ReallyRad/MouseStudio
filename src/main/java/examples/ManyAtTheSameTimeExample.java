@@ -1,5 +1,6 @@
 package examples;
 
+import both.MouseVisualizer;
 import both.Vec2D;
 import processing.core.PApplet;
 import both.MouseMovement;
@@ -11,7 +12,8 @@ import java.util.ArrayList;
  */
 public class ManyAtTheSameTimeExample extends PApplet {
     private MouseMovement mm;
-    int mousePathCount = 4900;
+    private MouseVisualizer mv;
+    int mousePathCount = 3000;
 
     int selectedIndex = 1; // ( int ) map( mouseX, 0, width, 0, mousePathCount );
     int size = 2;
@@ -25,41 +27,26 @@ public class ManyAtTheSameTimeExample extends PApplet {
     }
 
     public void setup () {
-        size( 1920, 1080, P2D );
+        size( 1920, 1080, P3D );
         println(sketchFullScreen());
 
         mm = new MouseMovement();
-        mm.setDataFolder( "saved" );
+        mm.setDataFolder( "itshow" );
+        mm.removeDoubleClicks();
         mm.loadRecordings( mousePathCount );
+
+        System.out.println( "Done loading." );
+
+        mv = new MouseVisualizer( this );
     }
 
     public void draw () {
         println( frameRate );
         background( 0 );
         stroke( 255, 90 );
-        for ( int i = 1; i < mousePathCount; i++ ) {
+        fill( 255 );
 
-
-            fill( 255 );
-
-            // selectedIndex = 1; // ( int ) map( mouseX, 0, width, 0, mousePathCount );
-            // if ( i == selectedIndex ) {
-            // size = 8;
-            // fill( 255, 100, 0 );
-            // }
-            //fill( 255, 255, 0 );
-            for ( Vec2D p : mm.get( i ).getPoints() ) {
-                 ellipse( p.x, p.y, size, size );
-            }
-
-            // Vec2D v = mm.getPositionFromPath( i );
-            // text( i + "", v.x + 5, v.y );
-            // ellipse( v.x, v.y, size*3, size*3 );
-
-
-            // for( Vec2D mapped : mm.get( i ).getPositionsMapped( mm.get( i ).getStartPos(), new Vec2D( mouseX, mouseY ) ) ) {
-//drawSelected( i );
-        }
+        mv.drawPaths( mm.getPaths() );
 
         drawSelected( this.selectedIndex );
     }

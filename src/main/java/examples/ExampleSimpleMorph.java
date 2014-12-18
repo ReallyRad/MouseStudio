@@ -40,8 +40,6 @@ public class ExampleSimpleMorph extends PApplet {
         mv.drawCurvedPath( p2 );
         mv.draw( p1 );
         mv.draw( p2 );
-
-        pMorphed.quit();
     }
 
     public void keyPressed () {
