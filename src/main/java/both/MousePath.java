@@ -134,10 +134,12 @@ public class MousePath {
 
     public void export( String folderToSaveTo ) {
         try {
-            String fileName = folderToSaveTo + File.separator + InputTypeItemListener.CURRENT_INPUT_TYPE + getCreationTime() + FILENAME_SUFFIX;
+            String fileName = InputTypeItemListener.CURRENT_INPUT_TYPE + getCreationTime() + FILENAME_SUFFIX;
+            String completeFileName = folderToSaveTo + File.separator + fileName;
             File folder = new File( folderToSaveTo );
             folder.mkdirs();
-            File file = createFile( fileName );
+            File file = createFile( completeFileName );
+            setOriginalFileName( fileName );
             BufferedWriter writer = new BufferedWriter( new FileWriter( file.getAbsoluteFile() ) );
 
             printHeader( writer );
