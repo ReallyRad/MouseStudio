@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Ani">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/Ani.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

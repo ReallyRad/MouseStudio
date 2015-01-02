@@ -2,6 +2,7 @@
   <library name="toxiclibscore">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/libs/toxiclibscore.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/toxiclibs_p5.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
