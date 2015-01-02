@@ -2,8 +2,7 @@ package both;
 
 import org.apache.log4j.Logger;
 import processing.core.PApplet;
-import processing.core.PConstants;
-import processing.core.PVector;
+import toxi.geom.AABB;
 import toxi.geom.Rect;
 import toxi.geom.Vec3D;
 import writing.InputTypeItemListener;
@@ -21,13 +20,18 @@ import java.util.*;
  * and positions of small parts of the movement.
  */
 public class MousePath {
-    private static final String FILENAME_SUFFIX = ".csv";
     private static Logger log = Logger.getLogger( MousePath.class );
-    @SuppressWarnings( "unused" )
-    private Date startTime, endTime;
-    private DateFormat dateFormat = new SimpleDateFormat( "_dd_MM_yyyy__HH_mm_ss_SSS" );
+
+    private static final DateFormat dateFormat = new SimpleDateFormat( "_dd_MM_yyyy__HH_mm_ss_SSS" );
+    private static final String FILENAME_SUFFIX = ".csv";
+
     private ArrayList< Pair > pairs;
-    private int index;
+    private int currentlySelectedPathIndex;
+
+    private Date startTime, endTime;
+
+
+
     private long currentMillis;
     private Vec2D lastPoint;
     private Vec2D acceleration;
@@ -39,7 +43,7 @@ public class MousePath {
         this.startTime = new Date();
         this.endTime = new Date();
         this.pairs = new ArrayList<>();
-        this.index = 0;
+        this.currentlySelectedPathIndex = 0;
         this.currentMillis = 0;
         this.lastPoint = new Vec2D();
         this.acceleration = new Vec2D();
@@ -139,7 +143,7 @@ public class MousePath {
             printHeader( writer );
 
             for ( Pair p : pairs ) {
-                writer.write( index + "," + p.getTime() + "," + ( int ) ( p.getPosition().x ) + "," + ( int ) ( p.getPosition().y ) + "\n" );
+                writer.write( currentlySelectedPathIndex + "," + p.getTime() + "," + ( int ) ( p.getPosition().x ) + "," + ( int ) ( p.getPosition().y ) + "\n" );
             }
             writer.close();
         } catch ( IOException e ) {
@@ -172,7 +176,7 @@ public class MousePath {
     public void clear() {
         this.pairs.clear();
         this.startTime = new Date();
-        index = 0;
+        currentlySelectedPathIndex = 0;
     }
 
     /**
@@ -301,8 +305,6 @@ public class MousePath {
         }
         mp.update();
 
-
-
         Vec2D currentStartToEnd = mp.getEndPos().sub( mp.getStartPos() );
         Vec2D newStartToEnd = newEnd.sub( newStart );
         currentStartToEnd = currentStartToEnd.normlize();
@@ -329,22 +331,6 @@ public class MousePath {
             p.setPosition( v );
         }
         return mp;
-    }
-
-    public ArrayList< Vec2D > getMorphed( MousePath toMorphTo, float percentage ) {
-        ArrayList< Vec2D > morphedPoints = new ArrayList<>();
-
-        for ( float i = 0.0f; i < 1.0f; i += 0.001 ) {
-            Vec2D startPosition = getPosition( i );
-            Vec2D endPosition = toMorphTo.getPosition( i );
-
-            Vec2D morphed = new Vec2D();
-            morphed.x = mixValues( startPosition.x, endPosition.x, percentage );
-            morphed.y = mixValues( startPosition.y, endPosition.y, percentage );
-            morphedPoints.add( morphed );
-        }
-
-        return morphedPoints;
     }
 
     public int size() {
@@ -539,5 +525,19 @@ public class MousePath {
             }
         }
         return true;
+    }
+
+    public AABB getBoundingBox() {
+        //Rect bb = new Rect( getCentroid().x, getCentroid().y, 10, 10 );
+        AABB bb = new AABB( new Vec3D( getStartPos().x, getStartPos().y, 0 ), 1.0f );
+        // use Collections.min() / Collections.max() on the ArrayList. Though I'm not sure
+        // how to compare the vectors and if it's even possible with non-basic types. cya later aligator
+
+        for( Pair p : getPairs() ) {
+            bb.includePoint( new Vec3D( p.getPosition().x, p.getPosition().y, 0 ) );
+        }
+
+        bb.updateBounds();
+        return bb;
     }
 }
